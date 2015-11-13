@@ -5,6 +5,7 @@ import java.io.IOException;
 import me.shib.java.telegram.bot.service.TelegramBotService;
 import me.shib.java.telegram.bot.types.ChatId;
 import me.shib.java.telegram.bot.types.Message;
+import me.shib.java.telegram.bot.types.ParseMode;
 
 public class TBotWorker extends Thread {
 	
@@ -76,8 +77,10 @@ public class TBotWorker extends Thread {
 								for(long admin : admins) {
 									tBotService.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()), message.getMessage_id());
 								}
+								tBotService.sendMessage(new ChatId(message.getChat().getId()), "Your request was duly noted.", ParseMode.None, false, message.getMessage_id());
 							}
 							else {
+								tBotService.sendMessage(new ChatId(message.getChat().getId()), "The support team is unavailable. Please try later.", ParseMode.None, false, message.getMessage_id());
 								return false;
 							}
 						}
