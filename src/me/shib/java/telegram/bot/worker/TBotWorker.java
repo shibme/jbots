@@ -8,7 +8,7 @@ import me.shib.java.telegram.bot.types.Message;
 
 public class TBotWorker extends Thread {
 	
-	private TBotModel tBotAct;
+	private TBotModel tBotModel;
 	private TBotConfig tBotConfig;
 	private TelegramBotService tBotService;
 	private int threadNumber;
@@ -20,19 +20,32 @@ public class TBotWorker extends Thread {
 		return TBotWorker.threadCounter;
 	}
 	
-	public TBotWorker(TBotModel tBotAct, TBotConfig tBotConfig) {
-		initTBotWorker(tBotAct, tBotConfig);
+	public TBotWorker(TBotModel tBotModel, TBotConfig tBotConfig) {
+		initTBotWorker(tBotModel, tBotConfig);
 	}
 	
-	public TBotWorker(TBotModel tBotAct) {
+	public TBotWorker(TBotModel tBotModel) {
 		tBotConfig = TBotConfig.getFileConfig();
-		initTBotWorker(tBotAct, tBotConfig);
+		initTBotWorker(tBotModel, tBotConfig);
 	}
 	
-	private void initTBotWorker(TBotModel tBotAct, TBotConfig tBotConfig) {
+	private void initTBotWorker(TBotModel tBotModel, TBotConfig tBotConfig) {
 		threadNumber = TBotWorker.getThreadNumber();
 		UpdateReceiver.setBotApiToken(tBotConfig.getBotApiToken());
-		this.tBotAct = tBotAct;
+		this.tBotModel = tBotModel;
+		if(this.tBotModel == null) {
+			this.tBotModel = new TBotModel() {
+				public Message onReceivingMessage(TelegramBotService tBotService, Message message) {
+					return null;
+				}
+				public Message onMessageFromAdmin(TelegramBotService tBotService, Message message) {
+					return null;
+				}
+				public Message customSupportHandler(TelegramBotService tBotService, Message message) {
+					return null;
+				}
+			};
+		}
 		this.tBotConfig = tBotConfig;
 		if((tBotConfig.getBotApiToken() != null) && (!tBotConfig.getBotApiToken().isEmpty())) {
 			tBotService = new TelegramBotService(tBotConfig.getBotApiToken());
@@ -52,7 +65,7 @@ public class TBotWorker extends Thread {
 					supportCommand = null;
 				}
 				if((supportCommand != null) &&(words[0].equalsIgnoreCase(tBotConfig.getSupportCommand()))) {
-					Message responseMessage = tBotAct.customSupportHandler(tBotService, message);
+					Message responseMessage = tBotModel.customSupportHandler(tBotService, message);
 					if(responseMessage == null) {
 						if(words.length == 1) {
 							tBotService.sendMessage(new ChatId(message.getChat().getId()), "Please provide a valid message following the \"" + tBotConfig.getSupportCommand() + "\" keyword.");
@@ -85,10 +98,10 @@ public class TBotWorker extends Thread {
 				long senderId = message.getChat().getId();
 				Message adminMessage = null;
 				if(tBotConfig.isAdminId(senderId)) {
-					adminMessage = tBotAct.onMessageFromAdmin(tBotService, message);
+					adminMessage = tBotModel.onMessageFromAdmin(tBotService, message);
 				}
 				if((adminMessage == null) && (!handleIfSupportMessage(tBotService, message))) {
-					tBotAct.onReceivingMessage(tBotService, message);
+					tBotModel.onReceivingMessage(tBotService, message);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

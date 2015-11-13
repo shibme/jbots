@@ -33,7 +33,7 @@ public class TBotConfig {
 		this.statusReportInterval = statusReportInterval;
 	}
 	
-	protected static synchronized TBotConfig getFileConfig() {
+	public static synchronized TBotConfig getFileConfig() {
 		if(fileConfig == null) {
 			File configFile = new File(TBotConfig.configFilePath);
 			if(configFile.exists()) {
