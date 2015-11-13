@@ -1,2 +1,2 @@
-# TelegramBotWorker
-A generic worker for ant telegram bot.
+# TBot
+A framework for creating telegram bots easily.
