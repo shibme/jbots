@@ -1,11 +1,7 @@
 package me.shib.java.telegram.bot.worker;
 
-import java.io.IOException;
-
 import me.shib.java.telegram.bot.service.TelegramBotService;
-import me.shib.java.telegram.bot.types.ChatId;
 import me.shib.java.telegram.bot.types.Message;
-import me.shib.java.telegram.bot.types.ParseMode;
 
 public class TBotWorker extends Thread {
 	
@@ -13,6 +9,8 @@ public class TBotWorker extends Thread {
 	private TBotConfig tBotConfig;
 	private TelegramBotService tBotService;
 	private int threadNumber;
+	private TBotModel defaultModel;
+	private boolean defaulModelInUse;
 	
 	private static int threadCounter = 0;
 	
@@ -30,30 +28,31 @@ public class TBotWorker extends Thread {
 		initTBotWorker(tBotModel, tBotConfig);
 	}
 	
+	private TBotModel getDefaultModel(TBotConfig tBotConfig) {
+		if(defaultModel == null) {
+			defaultModel = new DefaultBotModel(tBotConfig);
+		}
+		return defaultModel;
+	}
+	
 	private void initTBotWorker(TBotModel tBotModel, TBotConfig tBotConfig) {
 		threadNumber = TBotWorker.getThreadNumber();
 		UpdateReceiver.setBotApiToken(tBotConfig.getBotApiToken());
-		this.tBotModel = tBotModel;
-		if(this.tBotModel == null) {
-			this.tBotModel = new TBotModel() {
-				public Message onReceivingMessage(TelegramBotService tBotService, Message message) {
-					return null;
-				}
-				public Message onMessageFromAdmin(TelegramBotService tBotService, Message message) {
-					return null;
-				}
-				public Message customSupportHandler(TelegramBotService tBotService, Message message) {
-					return null;
-				}
-			};
-		}
 		this.tBotConfig = tBotConfig;
 		if((tBotConfig.getBotApiToken() != null) && (!tBotConfig.getBotApiToken().isEmpty())) {
 			tBotService = new TelegramBotService(tBotConfig.getBotApiToken());
 		}
+		if(tBotModel != null) {
+			this.tBotModel = tBotModel;
+			defaulModelInUse = false;
+		}
+		else {
+			this.tBotModel = getDefaultModel(tBotConfig);
+			defaulModelInUse = true;
+		}
 	}
 	
-	private boolean handleIfSupportMessage(TelegramBotService tBotService, Message message) throws IOException {
+	private boolean isSupportMessage(Message message) {
 		String text = message.getText();
 		if(text != null) {
 			String[] words = text.split("\\s+");
@@ -66,25 +65,6 @@ public class TBotWorker extends Thread {
 					supportCommand = null;
 				}
 				if((supportCommand != null) &&(words[0].equalsIgnoreCase(tBotConfig.getSupportCommand()))) {
-					Message responseMessage = tBotModel.customSupportHandler(tBotService, message);
-					if(responseMessage == null) {
-						if(words.length == 1) {
-							tBotService.sendMessage(new ChatId(message.getChat().getId()), "Please provide a valid message following the \"" + tBotConfig.getSupportCommand() + "\" keyword.");
-						}
-						else {
-							long[] admins = tBotConfig.getAdminIdList();
-							if((admins != null) && (admins.length > 0)) {
-								for(long admin : admins) {
-									tBotService.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()), message.getMessage_id());
-								}
-								tBotService.sendMessage(new ChatId(message.getChat().getId()), "Your request was duly noted.", ParseMode.None, false, message.getMessage_id());
-							}
-							else {
-								tBotService.sendMessage(new ChatId(message.getChat().getId()), "The support team is unavailable. Please try later.", ParseMode.None, false, message.getMessage_id());
-								return false;
-							}
-						}
-					}
 					return true;
 				}
 			}
@@ -99,11 +79,21 @@ public class TBotWorker extends Thread {
 				Message message = UpdateReceiver.getUpdate().getMessage();
 				CommonMethods.logNewMessage(message);
 				long senderId = message.getChat().getId();
-				Message adminMessage = null;
+				Message adminResponseMessage = null;
 				if(tBotConfig.isAdminId(senderId)) {
-					adminMessage = tBotModel.onMessageFromAdmin(tBotService, message);
+					adminResponseMessage = tBotModel.onMessageFromAdmin(tBotService, message);
+					if((adminResponseMessage == null) && (!defaulModelInUse)) {
+						adminResponseMessage = getDefaultModel(tBotConfig).onMessageFromAdmin(tBotService, message);
+					}
 				}
-				if((adminMessage == null) && (!handleIfSupportMessage(tBotService, message))) {
+				Message supporResponseMessage = null;
+				if((adminResponseMessage == null) && (isSupportMessage(message))) {
+					supporResponseMessage = tBotModel.supportMessageHandler(tBotService, message);
+					if((supporResponseMessage == null) && (!defaulModelInUse)) {
+						supporResponseMessage = getDefaultModel(tBotConfig).supportMessageHandler(tBotService, message);
+					}
+				}
+				if((adminResponseMessage == null) && (supporResponseMessage == null)) {
 					tBotModel.onReceivingMessage(tBotService, message);
 				}
 			} catch (Exception e) {

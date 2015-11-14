@@ -7,6 +7,6 @@ public interface TBotModel {
 	
 	public Message onReceivingMessage(TelegramBotService tBotService, Message message);
 	public Message onMessageFromAdmin(TelegramBotService tBotService, Message message);
-	public Message customSupportHandler(TelegramBotService tBotService, Message message);
+	public Message supportMessageHandler(TelegramBotService tBotService, Message message);
 	
 }
