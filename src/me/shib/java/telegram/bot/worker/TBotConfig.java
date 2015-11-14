@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import me.shib.java.rest.client.lib.JsonLib;
 
@@ -20,6 +22,7 @@ public class TBotConfig {
 	private long statusReportInterval;
 	private String supportCommand;
 	private String statusReportCommand;
+	private Map<String, String> constants;
 	
 	public TBotConfig(String botApiToken, long[] adminIdList, boolean supportMessageFilter, boolean reportStatus, long statusReportInterval) {
 		initTBotConfig(botApiToken, adminIdList, supportMessageFilter, reportStatus, statusReportInterval);
@@ -31,6 +34,7 @@ public class TBotConfig {
 		this.supportMessageFilter = supportMessageFilter;
 		this.reportStatus = reportStatus;
 		this.statusReportInterval = statusReportInterval;
+		constants = new HashMap<String, String>();
 	}
 	
 	public static synchronized TBotConfig getFileConfig() {
@@ -76,17 +80,20 @@ public class TBotConfig {
 		if(this.statusReportInterval < 1) {
 			this.statusReportInterval = oneDayInSeconds;
 		}
+		if(constants == null) {
+			constants = new HashMap<String, String>();
+		}
 	}
 	
-	protected String getBotApiToken() {
+	public String getBotApiToken() {
 		return botApiToken;
 	}
 
-	protected long[] getAdminIdList() {
+	public long[] getAdminIdList() {
 		return adminIdList;
 	}
 
-	protected boolean isAdminId(long id) {
+	public boolean isAdminId(long id) {
 		if((adminIdList != null) && (adminIdList.length > 0)) {
 			for(long adminId : adminIdList) {
 				if(id == adminId) {
@@ -97,32 +104,40 @@ public class TBotConfig {
 		return false;
 	}
 
-	protected boolean isSupportMessageFilter() {
+	public boolean isSupportMessageFilter() {
 		return supportMessageFilter;
 	}
 
-	protected boolean isReportStatus() {
+	public boolean isReportStatus() {
 		return reportStatus;
 	}
 
-	protected long getStatusReportInterval() {
+	public long getStatusReportInterval() {
 		return statusReportInterval;
 	}
 
-	protected String getSupportCommand() {
+	public String getSupportCommand() {
 		return supportCommand;
 	}
 
-	protected void setSupportCommand(String supportCommand) {
+	public void setSupportCommand(String supportCommand) {
 		this.supportCommand = supportCommand;
 	}
 
-	protected String getStatusReportCommand() {
+	public String getStatusReportCommand() {
 		return statusReportCommand;
 	}
 
-	protected void setStatusReportCommand(String statusReportCommand) {
+	public void setStatusReportCommand(String statusReportCommand) {
 		this.statusReportCommand = statusReportCommand;
+	}
+
+	public void setValueForKey(String key, String value) {
+		constants.put(key, value);
+	}
+
+	public String getValueForKey(String key) {
+		return constants.get(key);
 	}
 	
 }
