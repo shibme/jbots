@@ -1,11 +1,8 @@
 {
 	"botApiToken": "YourBotApiTokenGoesHere",
+	"commandList": ["/start","/help"],
 	"adminIdList": [1,2,3,4],
-	"supportMessageFilter": true,
-	"reportStatus": true,
-	"statusReportInterval": 86400,
-	"supportCommand": "/support",
-	"statusReportCommand": "/status",
+	"reportIntervalInSeconds": 86400,
 	"constants": {
 		"key1": "value1",
 		"key2": "value2"
