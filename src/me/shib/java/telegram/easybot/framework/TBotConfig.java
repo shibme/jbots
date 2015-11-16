@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,9 +12,10 @@ import me.shib.java.rest.client.lib.JsonLib;
 
 public class TBotConfig {
 	
-	private static final long oneDayInSeconds = 86400;
 	private static final String defaultConfigFilePath = "TBotConfig.json";
-	private static TBotConfig fileConfig;
+	private static final String[] defaultCommands = {"/start", "/status", "/scr"};
+	
+	private static Map<File, TBotConfig> fileConfigMap;
 	
 	private String botApiToken;
 	private String[] commandList;
@@ -46,49 +48,78 @@ public class TBotConfig {
 	}
 	
 	public static synchronized TBotConfig getFileConfig() {
-		return getFileConfig(TBotConfig.defaultConfigFilePath);
+		return getFileConfig(new File(TBotConfig.defaultConfigFilePath));
 	}
 	
-	public static synchronized TBotConfig getFileConfig(String configFilePath) {
-		if(fileConfig == null) {
-			File configFile = new File(configFilePath);
-			if(configFile.exists()) {
-				try {
-					StringBuilder jsonBuilder = new StringBuilder();
-					BufferedReader br = new BufferedReader(new FileReader(configFile));
-					String line = br.readLine();
-					while(line != null) {
-						jsonBuilder.append(line);
-						line = br.readLine();
-						if(line != null) {
-							jsonBuilder.append("\n");
-						}
+	public static synchronized TBotConfig getFileConfig(File configFile) {
+		if(fileConfigMap == null) {
+			fileConfigMap = new HashMap<File, TBotConfig>();
+		}
+		TBotConfig fileConfig = fileConfigMap.get(configFile);
+		if(configFile.exists()) {
+			try {
+				StringBuilder jsonBuilder = new StringBuilder();
+				BufferedReader br = new BufferedReader(new FileReader(configFile));
+				String line = br.readLine();
+				while(line != null) {
+					jsonBuilder.append(line);
+					line = br.readLine();
+					if(line != null) {
+						jsonBuilder.append("\n");
 					}
-					br.close();
-					fileConfig = JsonLib.fromJson(jsonBuilder.toString(), TBotConfig.class);
-					if(fileConfig != null) {
-						if(fileConfig.getBotApiToken() == null) {
-							fileConfig = null;
-						}
-						else {
-							fileConfig.initDefaults();
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
+				br.close();
+				fileConfig = JsonLib.fromJson(jsonBuilder.toString(), TBotConfig.class);
+				if(fileConfig != null) {
+					if(fileConfig.getBotApiToken() == null) {
+						fileConfig = null;
+					}
+					else {
+						fileConfig.initDefaults();
+					}
+				}
+				if(fileConfig != null) {
+					fileConfigMap.put(configFile, fileConfig);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		return fileConfig;
 	}
 	
+	private boolean doesStringExistInList(String str, ArrayList<String> list) {
+		for(int i = 0; i < list.size(); i++) {
+			if(list.get(i).equals(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void initDefaults() {
 		if(this.commandList == null) {
-			this.commandList = new String[1];
-			this.commandList[0] = "/start";
+			this.commandList = defaultCommands;
 		}
-		if(this.reportIntervalInSeconds < 1) {
-			this.reportIntervalInSeconds = oneDayInSeconds;
+		else {
+			ArrayList<String> newCommandList = new ArrayList<String>();
+			for(String command : this.commandList) {
+				if(!doesStringExistInList(command, newCommandList)) {
+					newCommandList.add(command);
+				}
+			}
+			if(defaultCommands != null) {
+				for(String command : defaultCommands) {
+					if(!doesStringExistInList(command, newCommandList)) {
+						newCommandList.add(command);
+					}
+				}
+			}
+			this.commandList = new String[newCommandList.size()];
+			this.commandList = newCommandList.toArray(this.commandList);
+		}
+		if(this.reportIntervalInSeconds < 0) {
+			this.reportIntervalInSeconds = 0;
 		}
 		if(constants == null) {
 			constants = new HashMap<String, String>();
@@ -110,9 +141,35 @@ public class TBotConfig {
 	public String[] getCommandList() {
 		return commandList;
 	}
+	
+	public boolean isValidCommand(String messageText) {
+		if((messageText != null) && (commandList != null)) {
+			String[] words = messageText.split("\\s+");
+			if(words.length > 0) {
+				String possibleCommand = words[0];
+				for(String command : commandList) {
+					if(command.equals(possibleCommand)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	public long[] getAdminIdList() {
 		return adminIdList;
+	}
+	
+	public boolean isAdmin(long senderId) {
+		if(adminIdList != null) {
+			for(long adminId : adminIdList) {
+				if(senderId == adminId) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public long getReportIntervalInSeconds() {

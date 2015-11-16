@@ -1,6 +1,6 @@
 {
 	"botApiToken": "YourBotApiTokenGoesHere",
-	"commandList": ["/start","/help"],
+	"commandList": ["/start","/status","/scr"],
 	"adminIdList": [1,2,3,4],
 	"reportIntervalInSeconds": 86400,
 	"constants": {

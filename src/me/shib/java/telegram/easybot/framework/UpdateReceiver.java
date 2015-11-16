@@ -92,4 +92,8 @@ public class UpdateReceiver {
 		return myIdentity;
 	}
 	
+	protected TelegramBotService getTelegramBotService() {
+		return this.tBotUpdateService;
+	}
+	
 }

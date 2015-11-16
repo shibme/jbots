@@ -53,35 +53,13 @@ public class TBotWorker extends Thread {
 		}
 	}
 	
-	private boolean isAdmin(long senderId) {
-		long[] adminList = tBotConfig.getAdminIdList();
-		if(adminList != null) {
-			for(long adminId : adminList) {
-				if(senderId == adminId) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	private boolean isValidCommand(String messageText) {
-		String[] commandList = tBotConfig.getCommandList();
-		if((messageText != null) && (commandList != null)) {
-			String[] words = messageText.split("\\s+");
-			if(words.length > 0) {
-				String possibleCommand = words[0];
-				for(String command : commandList) {
-					if(command.equals(possibleCommand)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-	
 	public void startBotWork() {
+		if(defaulModelInUse) {
+			TBotSweeper.startDefaultInstance(tBotModel, tBotConfig, null);
+		}
+		else {
+			TBotSweeper.startDefaultInstance(tBotModel, tBotConfig, getDefaultModel(tBotConfig));
+		}
 		updateReceiver.onBotStart();
 		System.out.println("Starting thread " + threadNumber + " of " + updateReceiver.whoAmI().getUsername());
 		while(true) {
@@ -89,14 +67,14 @@ public class TBotWorker extends Thread {
 				Message message = updateReceiver.getUpdate().getMessage();
 				long senderId = message.getChat().getId();
 				Message adminResponseMessage = null;
-				if(isAdmin(senderId)) {
+				if(tBotConfig.isAdmin(senderId)) {
 					adminResponseMessage = tBotModel.onMessageFromAdmin(tBotService, message);
 					if((adminResponseMessage == null) && (!defaulModelInUse)) {
 						adminResponseMessage = getDefaultModel(tBotConfig).onMessageFromAdmin(tBotService, message);
 					}
 				}
 				Message commandResponseMessage = null;
-				if((adminResponseMessage == null) && (isValidCommand(message.getText()))) {
+				if((adminResponseMessage == null) && (tBotConfig.isValidCommand(message.getText()))) {
 					commandResponseMessage = tBotModel.onCommand(tBotService, message);
 					if((commandResponseMessage == null) && (!defaulModelInUse)) {
 						commandResponseMessage = getDefaultModel(tBotConfig).onCommand(tBotService, message);
