@@ -1,8 +1,8 @@
-# TBot
-A framework for creating telegram bots easily.
+# TBot Framework
+A framework written over [TelegramBotJavaLibrary](https://github.com/shiblymeeran/TelegramBotJavaLibrary) to create bots in the easiest way and also making it smarter.
 
-### Downloads ###
-* [TBot JAR file](https://bitbucket.org/shiblymeeran/binarydownloads/downloads/TBot.jar)
+### Downloads [(Releases)](https://github.com/shiblymeeran/TBot/releases) ###
+* TBot JAR file
 
 ### Dependencies ###
 * [TelegramBotJavaLibrary](https://github.com/shiblymeeran/TelegramBotJavaLibrary)
