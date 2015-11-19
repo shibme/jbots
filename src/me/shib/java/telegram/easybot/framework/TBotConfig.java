@@ -69,7 +69,7 @@ public class TBotConfig {
 					}
 				}
 				br.close();
-				fileConfig = JsonLib.fromJson(jsonBuilder.toString(), TBotConfig.class);
+				fileConfig = JsonLib.getDefaultInstance().fromJson(jsonBuilder.toString(), TBotConfig.class);
 				if(fileConfig != null) {
 					if(fileConfig.getBotApiToken() == null) {
 						fileConfig = null;
