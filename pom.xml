@@ -6,7 +6,7 @@
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>easy-tbot</artifactId>
 	<version>0.8</version>
-	<name>East TBot Framework</name>
+	<name>Easy TBot Framework</name>
 	<description>A framework for creating bots with pre-build libraries</description>
 	<url>https://github.com/shiblymeeran/easy-tbot</url>
 	
