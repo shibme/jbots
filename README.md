@@ -1,4 +1,5 @@
-# easy-tbot
+[![Build Status](https://travis-ci.org/shiblymeeran/easy-tbot.svg)](https://travis-ci.org/shiblymeeran/easy-tbot)
+# easy-tbot #
 A framework for creating bots with pre-build libraries
 
 ### Maven Dependency for Consumers ###
