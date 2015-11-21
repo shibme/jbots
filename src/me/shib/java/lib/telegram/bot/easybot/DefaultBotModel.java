@@ -1,4 +1,4 @@
-package me.shib.java.telegram.easybot.framework;
+package me.shib.java.lib.telegram.bot.easybot;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -13,13 +13,13 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 
-import me.shib.java.telegram.bot.service.TelegramBotService;
-import me.shib.java.telegram.bot.service.TelegramBotService.ChatAction;
-import me.shib.java.telegram.bot.types.ChatId;
-import me.shib.java.telegram.bot.types.Message;
-import me.shib.java.telegram.bot.types.ParseMode;
-import me.shib.java.telegram.bot.types.TelegramFile;
-import me.shib.java.telegram.bot.types.User;
+import me.shib.java.lib.telegram.bot.service.TelegramBotService;
+import me.shib.java.lib.telegram.bot.service.TelegramBotService.ChatAction;
+import me.shib.java.lib.telegram.bot.types.ChatId;
+import me.shib.java.lib.telegram.bot.types.Message;
+import me.shib.java.lib.telegram.bot.types.ParseMode;
+import me.shib.java.lib.telegram.bot.types.TelegramFile;
+import me.shib.java.lib.telegram.bot.types.User;
 
 public class DefaultBotModel implements TBotModel {
 	

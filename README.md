@@ -1,8 +1,13 @@
-# TBot Framework
-A framework written over [TelegramBotJavaLibrary](https://github.com/shiblymeeran/TelegramBotJavaLibrary) to create bots in the easiest way and also making it smarter.
+# easy-tbot
+A framework for creating bots with pre-build libraries
 
-### Downloads [(Releases)](https://github.com/shiblymeeran/TBot/releases) ###
-* TBot Library JAR file
+### Maven Dependency for Consumers ###
+Add to your pom.xml:
 
-### Dependencies ###
-* [TelegramBotJavaLibrary](https://github.com/shiblymeeran/TelegramBotJavaLibrary)
+```xml
+<dependency>
+	<groupId>me.shib.java.lib</groupId>
+	<artifactId>easy-tbot</artifactId>
+	<version>0.8</version>
+</dependency>
+```

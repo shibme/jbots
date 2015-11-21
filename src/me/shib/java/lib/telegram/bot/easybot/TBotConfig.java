@@ -1,4 +1,4 @@
-package me.shib.java.telegram.easybot.framework;
+package me.shib.java.lib.telegram.bot.easybot;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.shib.java.rest.client.lib.JsonLib;
+import me.shib.java.lib.rest.client.JsonLib;
 
 public class TBotConfig {
 	

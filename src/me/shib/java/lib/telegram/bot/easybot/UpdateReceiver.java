@@ -1,4 +1,4 @@
-package me.shib.java.telegram.easybot.framework;
+package me.shib.java.lib.telegram.bot.easybot;
 
 import java.io.IOException;
 import java.util.Date;
@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import me.shib.java.telegram.bot.service.TelegramBotService;
-import me.shib.java.telegram.bot.types.Update;
-import me.shib.java.telegram.bot.types.User;
+import me.shib.java.lib.telegram.bot.service.TelegramBotService;
+import me.shib.java.lib.telegram.bot.types.Update;
+import me.shib.java.lib.telegram.bot.types.User;
 
 public class UpdateReceiver {
 	
