@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.shib.java.lib.rest.client.JsonLib;
+import me.shib.java.lib.common.utils.JsonLib;
 
 public class TBotConfig {
 	

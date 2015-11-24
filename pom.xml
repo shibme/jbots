@@ -5,9 +5,9 @@
 
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>easy-tbot</artifactId>
-	<version>0.8</version>
+	<version>0.8.1</version>
 	<name>Easy TBot Framework</name>
-	<description>A framework for creating bots with pre-build libraries</description>
+	<description>A framework for creating Telegram Bots with the hard parts done already</description>
 	<url>https://github.com/shiblymeeran/easy-tbot</url>
 	
 	<issueManagement>
@@ -146,7 +146,7 @@
 		<dependency>
 			<groupId>me.shib.java.lib</groupId>
 			<artifactId>telegram-bot-java</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3</version>
 		</dependency>
 	</dependencies>
 	

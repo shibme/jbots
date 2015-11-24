@@ -1,6 +1,8 @@
+# Easy TBot Framework
+A framework for creating Telegram Bots with the hard parts done already
+
+### Build Status ###
 [![Build Status](https://travis-ci.org/shiblymeeran/easy-tbot.svg)](https://travis-ci.org/shiblymeeran/easy-tbot)
-# easy-tbot #
-A framework for creating bots with pre-build libraries
 
 ### Maven Dependency for Consumers ###
 Add to your pom.xml:
@@ -9,6 +11,6 @@ Add to your pom.xml:
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>easy-tbot</artifactId>
-	<version>0.8</version>
+	<version>0.8.1</version>
 </dependency>
 ```
