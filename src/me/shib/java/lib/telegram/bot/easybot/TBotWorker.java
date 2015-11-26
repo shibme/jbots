@@ -61,7 +61,7 @@ public class TBotWorker extends Thread {
 			TBotSweeper.startDefaultInstance(tBotModel, tBotConfig, getDefaultModel(tBotConfig));
 		}
 		updateReceiver.onBotStart();
-		System.out.println("Starting thread " + threadNumber + " of " + updateReceiver.whoAmI().getUsername());
+		System.out.println("Starting thread " + threadNumber + " with " + updateReceiver.whoAmI().getUsername());
 		while(true) {
 			try {
 				Message message = updateReceiver.getUpdate().getMessage();

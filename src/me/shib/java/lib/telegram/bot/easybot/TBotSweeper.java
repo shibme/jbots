@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.shib.java.lib.telegram.bot.service.TelegramBotService;
-import me.shib.java.lib.telegram.bot.types.ChatId;
+import me.shib.java.lib.telegram.bot.types.Message;
 
 public class TBotSweeper extends Thread {
 	
@@ -45,19 +45,16 @@ public class TBotSweeper extends Thread {
 		}
 	}
 	
-	private void shootStatusUpdatesOnIntervals() {
+	private void sendStatusUpdatesOnIntervals() {
 		long intervals = this.tBotConfig.getReportIntervalInSeconds() * 1000;
 		long[] adminIdList = this.tBotConfig.getAdminIdList();
 		if((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
 			while(true) {
 				try {
-					String statusMessage = this.tBotModel.getStatusMessage();
-					if((statusMessage == null) && (defaultModel != null)) {
-						statusMessage = this.defaultModel.getStatusMessage();
-					}
-					if(statusMessage != null) {
-						for(long admin : adminIdList) {
-							sweeperTelegramBotService.sendMessage(new ChatId(admin), statusMessage);
+					for(long admin : adminIdList) {
+						Message sentStatusMessage = this.tBotModel.sendStatusMessage(sweeperTelegramBotService, admin);
+						if((sentStatusMessage == null) && (defaultModel != null)) {
+							sentStatusMessage = this.defaultModel.sendStatusMessage(sweeperTelegramBotService, admin);
 						}
 					}
 					Thread.sleep(intervals);
@@ -67,7 +64,7 @@ public class TBotSweeper extends Thread {
 	}
 	
 	public void run() {
-		shootStatusUpdatesOnIntervals();
+		sendStatusUpdatesOnIntervals();
 	}
 	
 }

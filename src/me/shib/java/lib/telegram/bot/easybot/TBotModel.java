@@ -7,5 +7,5 @@ public interface TBotModel {
 	public Message onMessageFromAdmin(TelegramBotService tBotService, Message message);
 	public Message onCommand(TelegramBotService tBotService, Message message);
 	public Message onReceivingMessage(TelegramBotService tBotService, Message message);
-	public String getStatusMessage();
+	public Message sendStatusMessage(TelegramBotService tBotService, long chatId);
 }
