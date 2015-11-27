@@ -27,13 +27,21 @@ public class DefaultBotModel implements TBotModel {
 
 	private TBotConfig tBotConfig;
 	private UpdateReceiver updRecvr;
+	private TBotModel appModel;
 
-	protected DefaultBotModel(TBotConfig tBotConfig) {
+	protected DefaultBotModel(TBotConfig tBotConfig, TBotModel appModel) {
+		this.appModel = appModel;
 		this.tBotConfig = tBotConfig;
 		this.updRecvr = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken());
 	}
 
 	public Message onReceivingMessage(TelegramBotService tBotService, Message message) {
+		if(appModel != null) {
+			Message appModelReponseMessage = appModel.onReceivingMessage(tBotService, message);
+			if(appModelReponseMessage != null) {
+				return appModelReponseMessage;
+			}
+		}
 		try {
 			long[] admins = tBotConfig.getAdminIdList();
 			if ((admins != null) && (admins.length > 0)) {
@@ -61,6 +69,12 @@ public class DefaultBotModel implements TBotModel {
 	}
 
 	public Message onMessageFromAdmin(TelegramBotService tBotService, Message message) {
+		if(appModel != null) {
+			Message appModelReponseMessage = appModel.onMessageFromAdmin(tBotService, message);
+			if(appModelReponseMessage != null) {
+				return appModelReponseMessage;
+			}
+		}
 		try {
 			long replyToUser = message.getReply_to_message().getForward_from().getId();
 			if (replyToUser > 0) {
@@ -112,6 +126,12 @@ public class DefaultBotModel implements TBotModel {
 	}
 
 	public Message onCommand(TelegramBotService tBotService, Message message) {
+		if(appModel != null) {
+			Message appModelReponseMessage = appModel.onCommand(tBotService, message);
+			if(appModelReponseMessage != null) {
+				return appModelReponseMessage;
+			}
+		}
 		switch (message.getText()) {
 		case "/start":
 			if (tBotConfig.isValidCommand("/start")) {
@@ -191,6 +211,12 @@ public class DefaultBotModel implements TBotModel {
 
 	@Override
 	public Message sendStatusMessage(TelegramBotService tBotService, long chatId) {
+		if(appModel != null) {
+			Message appModelReponseMessage = appModel.sendStatusMessage(tBotService, chatId);
+			if(appModelReponseMessage != null) {
+				return appModelReponseMessage;
+			}
+		}
 		try {
 			return tBotService.sendMessage(new ChatId(chatId),
 					"Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
