@@ -12,7 +12,7 @@ import me.shib.java.lib.common.utils.JsonLib;
 
 public class TBotConfig {
 	
-	private static final String defaultConfigFilePath = "easy-bot-config.json";
+	private static final String defaultConfigFilePath = "easy-tbot-config.json";
 	private static final String[] defaultCommands = {"/start", "/status", "/scr"};
 	
 	private static Map<File, TBotConfig[]> fileConfigListMap;
