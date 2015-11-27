@@ -1,0 +1,26 @@
+[
+	{
+		"botLauncherclassName": "com.example.TBotLauncherModelClass1",
+		"botApiToken": "YourBotApiTokenGoesHere",
+		"commandList": ["/start","/help","/status","/scr"],
+		"threadCount": 4,
+		"adminIdList": [000000000, 000000000],
+		"reportIntervalInSeconds": 86400,
+		"constants": {
+			"key1": "value1",
+			"key2": "value2"
+		}
+	},
+	{
+		"botLauncherclassName": "com.example.TBotLauncherModelClass2",
+		"botApiToken": "YourBotApiTokenGoesHere",
+		"commandList": ["/start","/help","/status","/scr"],
+		"threadCount": 4,
+		"adminIdList": [000000000, 000000000],
+		"reportIntervalInSeconds": 86400,
+		"constants": {
+			"key1": "value1",
+			"key2": "value2"
+		}
+	}
+]

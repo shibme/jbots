@@ -25,11 +25,6 @@ public class TBotWorker extends Thread {
 		initTBotWorker(tBotModel, tBotConfig);
 	}
 	
-	public TBotWorker(TBotModel tBotModel) {
-		tBotConfig = TBotConfig.getFileConfig();
-		initTBotWorker(tBotModel, tBotConfig);
-	}
-	
 	private void initTBotWorker(TBotModel tBotModel, TBotConfig tBotConfig) {
 		updateReceiver = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken());
 		this.tBotConfig = tBotConfig;

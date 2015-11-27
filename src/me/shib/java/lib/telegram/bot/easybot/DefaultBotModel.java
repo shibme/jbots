@@ -124,7 +124,16 @@ public class DefaultBotModel implements TBotModel {
 			return null;
 		}
 	}
-
+	
+	private Message onStartAndHelp(TelegramBotService tBotService, Message message) throws IOException {
+		tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+		User myself = updRecvr.whoAmI();
+		return tBotService.sendMessage(new ChatId(message.getChat().getId()),
+				"Hi " + message.getFrom().getFirst_name() + ". My name is *" + myself.getFirst_name()
+						+ "* (@" + myself.getUsername() + "). I'll try to serve you the best"
+								+ " with all my efforts. Welcome!", ParseMode.Markdown);
+	}
+	
 	public Message onCommand(TelegramBotService tBotService, Message message) {
 		if(appModel != null) {
 			Message appModelReponseMessage = appModel.onCommand(tBotService, message);
@@ -136,13 +145,16 @@ public class DefaultBotModel implements TBotModel {
 		case "/start":
 			if (tBotConfig.isValidCommand("/start")) {
 				try {
-					tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
-					User myself = updRecvr.whoAmI();
-					return tBotService.sendMessage(new ChatId(message.getChat().getId()),
-							"Hi " + message.getFrom().getFirst_name() + ". My name is *" + myself.getFirst_name()
-									+ "* (@" + myself.getUsername() + ")."
-									+ " I'll try to serve you the best with all my efforts. Welcome!",
-							ParseMode.Markdown);
+					return onStartAndHelp(tBotService, message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case "/help":
+			if (tBotConfig.isValidCommand("/help")) {
+				try {
+					return onStartAndHelp(tBotService, message);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
