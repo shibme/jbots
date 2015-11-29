@@ -1,12 +1,12 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBotService;
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
 import me.shib.java.lib.telegram.bot.types.Message;
 
 public class TBotWorker extends Thread {
 	
 	private TBotConfig tBotConfig;
-	private TelegramBotService tBotService;
+	private TelegramBot tBotService;
 	private UpdateReceiver updateReceiver;
 	private int threadNumber;
 	private TBotModel defaultModel;
@@ -29,7 +29,7 @@ public class TBotWorker extends Thread {
 		updateReceiver = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken());
 		this.tBotConfig = tBotConfig;
 		if((tBotConfig.getBotApiToken() != null) && (!tBotConfig.getBotApiToken().isEmpty())) {
-			tBotService = new TelegramBotService(tBotConfig.getBotApiToken());
+			tBotService = new TelegramBot(tBotConfig.getBotApiToken());
 			defaultModel = new DefaultBotModel(tBotConfig, tBotModel);
 		}
 	}

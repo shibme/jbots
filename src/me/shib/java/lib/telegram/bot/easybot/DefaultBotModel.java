@@ -13,8 +13,8 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBotService;
-import me.shib.java.lib.telegram.bot.service.TelegramBotService.ChatAction;
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
+import me.shib.java.lib.telegram.bot.service.TelegramBot.ChatAction;
 import me.shib.java.lib.telegram.bot.types.ChatId;
 import me.shib.java.lib.telegram.bot.types.Message;
 import me.shib.java.lib.telegram.bot.types.ParseMode;
@@ -35,7 +35,7 @@ public class DefaultBotModel implements TBotModel {
 		this.updRecvr = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken());
 	}
 
-	public Message onReceivingMessage(TelegramBotService tBotService, Message message) {
+	public Message onReceivingMessage(TelegramBot tBotService, Message message) {
 		if(appModel != null) {
 			Message appModelReponseMessage = appModel.onReceivingMessage(tBotService, message);
 			if(appModelReponseMessage != null) {
@@ -68,7 +68,7 @@ public class DefaultBotModel implements TBotModel {
 		}
 	}
 
-	public Message onMessageFromAdmin(TelegramBotService tBotService, Message message) {
+	public Message onMessageFromAdmin(TelegramBot tBotService, Message message) {
 		if(appModel != null) {
 			Message appModelReponseMessage = appModel.onMessageFromAdmin(tBotService, message);
 			if(appModelReponseMessage != null) {
@@ -125,7 +125,7 @@ public class DefaultBotModel implements TBotModel {
 		}
 	}
 	
-	private Message onStartAndHelp(TelegramBotService tBotService, Message message) throws IOException {
+	private Message onStartAndHelp(TelegramBot tBotService, Message message) throws IOException {
 		tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
 		User myself = updRecvr.whoAmI();
 		return tBotService.sendMessage(new ChatId(message.getChat().getId()),
@@ -134,7 +134,7 @@ public class DefaultBotModel implements TBotModel {
 								+ " with all my efforts. Welcome!", ParseMode.Markdown);
 	}
 	
-	public Message onCommand(TelegramBotService tBotService, Message message) {
+	public Message onCommand(TelegramBot tBotService, Message message) {
 		if(appModel != null) {
 			Message appModelReponseMessage = appModel.onCommand(tBotService, message);
 			if(appModelReponseMessage != null) {
@@ -222,7 +222,7 @@ public class DefaultBotModel implements TBotModel {
 	}
 
 	@Override
-	public Message sendStatusMessage(TelegramBotService tBotService, long chatId) {
+	public Message sendStatusMessage(TelegramBot tBotService, long chatId) {
 		if(appModel != null) {
 			Message appModelReponseMessage = appModel.sendStatusMessage(tBotService, chatId);
 			if(appModelReponseMessage != null) {

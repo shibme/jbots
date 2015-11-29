@@ -3,7 +3,7 @@ package me.shib.java.lib.telegram.bot.easybot;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBotService;
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
 
 public class TBotSweeper extends Thread {
 	
@@ -11,12 +11,12 @@ public class TBotSweeper extends Thread {
 	
 	private TBotModel defaultModel;
 	private TBotConfig tBotConfig;
-	private TelegramBotService sweeperTelegramBotService;
+	private TelegramBot sweeperTelegramBot;
 	
 	private TBotSweeper(TBotModel defaultModel, TBotConfig tBotConfig) {
 		this.tBotConfig = tBotConfig;
 		this.defaultModel = defaultModel;
-		this.sweeperTelegramBotService = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken()).getTelegramBotService();
+		this.sweeperTelegramBot = UpdateReceiver.getDefaultInstance(tBotConfig.getBotApiToken()).getTelegramBot();
 	}
 	
 	private static synchronized TBotSweeper getDefaultInstance(TBotModel defaultModel, TBotConfig tBotConfig) {
@@ -49,7 +49,7 @@ public class TBotSweeper extends Thread {
 			while(true) {
 				try {
 					for(long admin : adminIdList) {
-						this.defaultModel.sendStatusMessage(sweeperTelegramBotService, admin);
+						this.defaultModel.sendStatusMessage(sweeperTelegramBot, admin);
 					}
 					Thread.sleep(intervals);
 				} catch (Exception e) {}

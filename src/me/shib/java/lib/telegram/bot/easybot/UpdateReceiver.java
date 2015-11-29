@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBotService;
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
 import me.shib.java.lib.telegram.bot.types.Update;
 import me.shib.java.lib.telegram.bot.types.User;
 
@@ -17,15 +17,15 @@ public class UpdateReceiver {
 	
 	private static Map<String, UpdateReceiver> updateReceiverMap;
 	
-	private Queue<Update> updatesQueue = new LinkedList<Update>();
-	private TelegramBotService tBotUpdateService;
+	private Queue<Update> updatesQueue;
+	private TelegramBot tBotUpdateService;
 	private User myIdentity;
 	private long lastMyIdentityCheck;
 	private boolean botStarted;
 	
 	private UpdateReceiver(String botApiToken) {
 		this.updatesQueue = new LinkedList<Update>();
-		this.tBotUpdateService = new TelegramBotService(botApiToken);
+		this.tBotUpdateService = new TelegramBot(botApiToken);
 		this.lastMyIdentityCheck = 0;
 		botStarted = false;
 	}
@@ -92,7 +92,7 @@ public class UpdateReceiver {
 		return myIdentity;
 	}
 	
-	protected TelegramBotService getTelegramBotService() {
+	protected TelegramBot getTelegramBot() {
 		return this.tBotUpdateService;
 	}
 	
