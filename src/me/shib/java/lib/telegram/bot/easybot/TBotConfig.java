@@ -11,12 +11,12 @@ import java.util.Map;
 import me.shib.java.lib.common.utils.JsonLib;
 
 public class TBotConfig {
-	
+
 	private static final String defaultConfigFilePath = "easy-tbot-config.json";
-	private static final String[] defaultCommands = {"/start", "/status", "/scr"};
-	
+	private static final String[] defaultCommands = { "/start", "/status", "/scr" };
+
 	private static Map<File, TBotConfig[]> fileConfigListMap;
-	
+
 	private String botLauncherclassName;
 	private String botApiToken;
 	private String[] commandList;
@@ -24,28 +24,32 @@ public class TBotConfig {
 	private long[] adminIdList;
 	private long reportIntervalInSeconds;
 	private Map<String, String> constants;
-	
-	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList, long reportIntervalInSeconds, int threadCount) {
-		initTBotConfig(botLauncherclassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds, threadCount);
+
+	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList,
+			long reportIntervalInSeconds, int threadCount) {
+		initTBotConfig(botLauncherclassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds,
+				threadCount);
 	}
-	
-	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList, long reportIntervalInSeconds) {
+
+	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList,
+			long reportIntervalInSeconds) {
 		initTBotConfig(botLauncherclassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds, 0);
 	}
-	
+
 	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList) {
 		initTBotConfig(botLauncherclassName, botApiToken, commandList, adminIdList, 0, 0);
 	}
-	
+
 	public TBotConfig(String botLauncherclassName, String botApiToken, String[] commandList) {
 		initTBotConfig(botLauncherclassName, botApiToken, commandList, null, 0, 0);
 	}
-	
+
 	public TBotConfig(String botLauncherclassName, String botApiToken) {
 		initTBotConfig(botLauncherclassName, botApiToken, null, null, 0, 0);
 	}
-	
-	private void initTBotConfig(String botLauncherclassName, String botApiToken, String[] commandList, long[] adminIdList, long reportIntervalInSeconds, int threadCount) {
+
+	private void initTBotConfig(String botLauncherclassName, String botApiToken, String[] commandList,
+			long[] adminIdList, long reportIntervalInSeconds, int threadCount) {
 		this.botLauncherclassName = botLauncherclassName;
 		this.botApiToken = botApiToken;
 		this.commandList = commandList;
@@ -54,71 +58,94 @@ public class TBotConfig {
 		this.threadCount = threadCount;
 		initDefaults();
 	}
-	
-	public static synchronized TBotConfig[] getFileConfigList() {
-		return getFileConfigList(new File(TBotConfig.defaultConfigFilePath));
-	}
-	
-	public static synchronized TBotConfig[] getFileConfigList(File configFile) {
-		if(fileConfigListMap == null) {
-			fileConfigListMap = new HashMap<File, TBotConfig[]>();
-		}
-		TBotConfig[] fileConfigList = fileConfigListMap.get(configFile);
-		if(configFile.exists()) {
-			try {
-				StringBuilder jsonBuilder = new StringBuilder();
-				BufferedReader br = new BufferedReader(new FileReader(configFile));
-				String line = br.readLine();
-				while(line != null) {
-					jsonBuilder.append(line);
-					line = br.readLine();
-					if(line != null) {
-						jsonBuilder.append("\n");
-					}
-				}
-				br.close();
-				fileConfigList = JsonLib.getDefaultInstance().fromJson(jsonBuilder.toString(), TBotConfig[].class);
-				if(fileConfigList != null) {
-					for(int i = 0; i < fileConfigList.length; i++) {
-						if(fileConfigList[i].getBotApiToken() == null) {
-							fileConfigList[i] = null;
-						}
-						else {
-							fileConfigList[i].initDefaults();
-						}
-					}
-					fileConfigListMap.put(configFile, fileConfigList);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return fileConfigList;
-	}
-	
-	private boolean doesStringExistInList(String str, ArrayList<String> list) {
-		for(int i = 0; i < list.size(); i++) {
-			if(list.get(i).equals(str)) {
+
+	private static boolean isBotAlreadyInUse(ArrayList<TBotConfig> fileConfigs, String botApiToken) {
+		for (int i = 0; i < fileConfigs.size(); i++) {
+			if (fileConfigs.get(i).getBotApiToken().equals(botApiToken)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	private void initDefaults() {
-		if(this.commandList == null) {
-			this.commandList = defaultCommands;
+
+	private static boolean isClassExistInClassPath(String className) {
+		try {
+			if ((className != null) && (!className.isEmpty())) {
+				Class.forName(className);
+				return true;
+			}
+		} catch (ClassNotFoundException e) {
 		}
-		else {
+		return false;
+	}
+
+	public static synchronized TBotConfig[] getFileConfigList() {
+		return getFileConfigList(new File(TBotConfig.defaultConfigFilePath));
+	}
+
+	public static synchronized TBotConfig[] getFileConfigList(File configFile) {
+		if (fileConfigListMap == null) {
+			fileConfigListMap = new HashMap<File, TBotConfig[]>();
+		}
+		TBotConfig[] fileConfigArray = fileConfigListMap.get(configFile);
+		if (configFile.exists()) {
+			try {
+				StringBuilder jsonBuilder = new StringBuilder();
+				BufferedReader br = new BufferedReader(new FileReader(configFile));
+				String line = br.readLine();
+				while (line != null) {
+					jsonBuilder.append(line);
+					line = br.readLine();
+					if (line != null) {
+						jsonBuilder.append("\n");
+					}
+				}
+				br.close();
+				fileConfigArray = JsonLib.getDefaultInstance().fromJson(jsonBuilder.toString(), TBotConfig[].class);
+				ArrayList<TBotConfig> fileConfigList = new ArrayList<TBotConfig>();
+				if (fileConfigArray != null) {
+					for (int i = 0; i < fileConfigArray.length; i++) {
+						if ((fileConfigArray[i].getBotApiToken() != null)
+								&& (!fileConfigArray[i].getBotApiToken().isEmpty())
+								&& (!isBotAlreadyInUse(fileConfigList, fileConfigArray[i].getBotApiToken()))
+								&& isClassExistInClassPath(fileConfigArray[i].getBotLauncherclassName())) {
+							fileConfigList.add(fileConfigArray[i]);
+							fileConfigArray[i].initDefaults();
+						}
+					}
+					fileConfigArray = new TBotConfig[fileConfigList.size()];
+					fileConfigArray = fileConfigList.toArray(fileConfigArray);
+					fileConfigListMap.put(configFile, fileConfigArray);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return fileConfigArray;
+	}
+
+	private boolean doesStringExistInList(String str, ArrayList<String> list) {
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).equals(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void initDefaults() {
+		if (this.commandList == null) {
+			this.commandList = defaultCommands;
+		} else {
 			ArrayList<String> newCommandList = new ArrayList<String>();
-			for(String command : this.commandList) {
-				if(!doesStringExistInList(command, newCommandList)) {
+			for (String command : this.commandList) {
+				if (!doesStringExistInList(command, newCommandList)) {
 					newCommandList.add(command);
 				}
 			}
-			if(defaultCommands != null) {
-				for(String command : defaultCommands) {
-					if(!doesStringExistInList(command, newCommandList)) {
+			if (defaultCommands != null) {
+				for (String command : defaultCommands) {
+					if (!doesStringExistInList(command, newCommandList)) {
 						newCommandList.add(command);
 					}
 				}
@@ -126,13 +153,13 @@ public class TBotConfig {
 			this.commandList = new String[newCommandList.size()];
 			this.commandList = newCommandList.toArray(this.commandList);
 		}
-		if(this.reportIntervalInSeconds < 0) {
+		if (this.reportIntervalInSeconds < 0) {
 			this.reportIntervalInSeconds = 0;
 		}
-		if(constants == null) {
+		if (constants == null) {
 			constants = new HashMap<String, String>();
 		}
-		if(this.threadCount < 1) {
+		if (this.threadCount < 1) {
 			this.threadCount = 1;
 		}
 	}
@@ -152,14 +179,14 @@ public class TBotConfig {
 	public String[] getCommandList() {
 		return commandList;
 	}
-	
+
 	public boolean isValidCommand(String messageText) {
-		if((messageText != null) && (commandList != null)) {
+		if ((messageText != null) && (commandList != null)) {
 			String[] words = messageText.split("\\s+");
-			if(words.length > 0) {
+			if (words.length > 0) {
 				String possibleCommand = words[0];
-				for(String command : commandList) {
-					if(command.equals(possibleCommand)) {
+				for (String command : commandList) {
+					if (command.equals(possibleCommand)) {
 						return true;
 					}
 				}
@@ -171,11 +198,11 @@ public class TBotConfig {
 	public long[] getAdminIdList() {
 		return adminIdList;
 	}
-	
+
 	public boolean isAdmin(long senderId) {
-		if(adminIdList != null) {
-			for(long adminId : adminIdList) {
-				if(senderId == adminId) {
+		if (adminIdList != null) {
+			for (long adminId : adminIdList) {
+				if (senderId == adminId) {
 					return true;
 				}
 			}
@@ -194,5 +221,5 @@ public class TBotConfig {
 	public String getBotLauncherclassName() {
 		return botLauncherclassName;
 	}
-	
+
 }

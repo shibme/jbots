@@ -36,9 +36,9 @@ public class DefaultBotModel implements TBotModel {
 	}
 
 	public Message onReceivingMessage(TelegramBot tBotService, Message message) {
-		if(appModel != null) {
+		if (appModel != null) {
 			Message appModelReponseMessage = appModel.onReceivingMessage(tBotService, message);
-			if(appModelReponseMessage != null) {
+			if (appModelReponseMessage != null) {
 				return appModelReponseMessage;
 			}
 		}
@@ -69,9 +69,9 @@ public class DefaultBotModel implements TBotModel {
 	}
 
 	public Message onMessageFromAdmin(TelegramBot tBotService, Message message) {
-		if(appModel != null) {
+		if (appModel != null) {
 			Message appModelReponseMessage = appModel.onMessageFromAdmin(tBotService, message);
-			if(appModelReponseMessage != null) {
+			if (appModelReponseMessage != null) {
 				return appModelReponseMessage;
 			}
 		}
@@ -124,20 +124,20 @@ public class DefaultBotModel implements TBotModel {
 			return null;
 		}
 	}
-	
+
 	private Message onStartAndHelp(TelegramBot tBotService, Message message) throws IOException {
 		tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
 		User myself = updRecvr.whoAmI();
 		return tBotService.sendMessage(new ChatId(message.getChat().getId()),
-				"Hi " + message.getFrom().getFirst_name() + ". My name is *" + myself.getFirst_name()
-						+ "* (@" + myself.getUsername() + "). I'll try to serve you the best"
-								+ " with all my efforts. Welcome!", ParseMode.Markdown);
+				"Hi " + message.getFrom().getFirst_name() + ". My name is *" + myself.getFirst_name() + "* (@"
+						+ myself.getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
+				ParseMode.Markdown);
 	}
-	
+
 	public Message onCommand(TelegramBot tBotService, Message message) {
-		if(appModel != null) {
+		if (appModel != null) {
 			Message appModelReponseMessage = appModel.onCommand(tBotService, message);
-			if(appModelReponseMessage != null) {
+			if (appModelReponseMessage != null) {
 				return appModelReponseMessage;
 			}
 		}
@@ -223,9 +223,9 @@ public class DefaultBotModel implements TBotModel {
 
 	@Override
 	public Message sendStatusMessage(TelegramBot tBotService, long chatId) {
-		if(appModel != null) {
+		if (appModel != null) {
 			Message appModelReponseMessage = appModel.sendStatusMessage(tBotService, chatId);
-			if(appModelReponseMessage != null) {
+			if (appModelReponseMessage != null) {
 				return appModelReponseMessage;
 			}
 		}
