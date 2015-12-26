@@ -2,7 +2,7 @@
 A framework for creating Telegram Bots with the hard parts done already
 
 ### Build Status ###
-[![Build Status](https://travis-ci.org/shiblymeeran/easy-tbot.svg)](https://travis-ci.org/shiblymeeran/easy-tbot)
+[![Build Status](https://travis-ci.org/shibme/easy-tbot.svg)](https://travis-ci.org/shibme/easy-tbot)
 
 ### Maven Dependency for Consumers ###
 Add to your pom.xml:
