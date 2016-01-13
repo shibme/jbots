@@ -1,6 +1,6 @@
 [
 	{
-		"botLauncherclassName": "com.example.TBotLauncherModelClass1",
+		"botModelclassName": "com.example.TBotModelClass1",
 		"botApiToken": "YourBotApiTokenGoesHere",
 		"commandList": ["/start","/help","/status","/scr"],
 		"threadCount": 4,
@@ -12,7 +12,7 @@
 		}
 	},
 	{
-		"botLauncherclassName": "com.example.TBotLauncherModelClass2",
+		"botModelclassName": "com.example.TBotModelClass2",
 		"botApiToken": "YourBotApiTokenGoesHere",
 		"commandList": ["/start","/help","/status","/scr"],
 		"threadCount": 4,

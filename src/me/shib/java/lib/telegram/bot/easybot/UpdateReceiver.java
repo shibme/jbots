@@ -1,14 +1,14 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
+import me.shib.java.lib.telegram.bot.types.Update;
+import me.shib.java.lib.telegram.bot.types.User;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-
-import me.shib.java.lib.telegram.bot.service.TelegramBot;
-import me.shib.java.lib.telegram.bot.types.Update;
-import me.shib.java.lib.telegram.bot.types.User;
 
 public class UpdateReceiver {
 
@@ -19,20 +19,20 @@ public class UpdateReceiver {
     private User myIdentity;
     private boolean botStarted;
 
-    private UpdateReceiver(TelegramBot tBot) {
+    private UpdateReceiver(String botAPItoken) {
         this.updatesQueue = new LinkedList<>();
-        this.bot = tBot;
+        this.bot = TelegramBot.getInstance(botAPItoken);
         botStarted = false;
     }
 
-    protected static synchronized UpdateReceiver getDefaultInstance(TelegramBot bot) {
+    protected static synchronized UpdateReceiver getDefaultInstance(String botAPItoken) {
         if (updateReceiverMap == null) {
             updateReceiverMap = new HashMap<>();
         }
-        UpdateReceiver updateReceiver = updateReceiverMap.get(bot.getBotApiToken());
+        UpdateReceiver updateReceiver = updateReceiverMap.get(botAPItoken);
         if (updateReceiver == null) {
-            updateReceiver = new UpdateReceiver(bot);
-            updateReceiverMap.put(bot.getBotApiToken(), updateReceiver);
+            updateReceiver = new UpdateReceiver(botAPItoken);
+            updateReceiverMap.put(botAPItoken, updateReceiver);
         }
         return updateReceiver;
     }

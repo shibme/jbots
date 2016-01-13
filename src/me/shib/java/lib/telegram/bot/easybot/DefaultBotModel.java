@@ -1,9 +1,11 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
+import me.shib.java.lib.telegram.bot.service.TelegramBot.ChatAction;
+import me.shib.java.lib.telegram.bot.types.*;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,54 +13,74 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import javax.imageio.ImageIO;
-
-import me.shib.java.lib.telegram.bot.service.TelegramBot;
-import me.shib.java.lib.telegram.bot.service.TelegramBot.ChatAction;
-import me.shib.java.lib.telegram.bot.types.ChatId;
-import me.shib.java.lib.telegram.bot.types.Message;
-import me.shib.java.lib.telegram.bot.types.ParseMode;
-import me.shib.java.lib.telegram.bot.types.TelegramFile;
-import me.shib.java.lib.telegram.bot.types.User;
-
-public class DefaultBotModel implements TBotModel {
+public class DefaultBotModel extends BotModel {
 
     private static final Date startTime = new Date();
 
-    private TBotConfig tBotConfig;
+    private BotConfig botConfig;
     private User myIdentity;
-    private TBotModel appModel;
+    private BotModel appModel;
 
-    protected DefaultBotModel(TBotConfig tBotConfig, TBotModel appModel, TelegramBot bot) {
+    protected DefaultBotModel(BotModel appModel) {
         this.appModel = appModel;
-        this.tBotConfig = tBotConfig;
-        this.myIdentity = UpdateReceiver.getDefaultInstance(bot).whoAmI();
+        this.botConfig = appModel.getBotConfig();
+        this.myIdentity = UpdateReceiver.getDefaultInstance(this.botConfig.getBotApiToken()).whoAmI();
     }
 
-    public Message onReceivingMessage(TelegramBot tBotService, Message message) {
-        if (appModel != null) {
-            Message appModelReponseMessage = appModel.onReceivingMessage(tBotService, message);
-            if (appModelReponseMessage != null) {
-                return appModelReponseMessage;
-            }
+    private static String getUpTime() {
+        long start = startTime.getTime();
+        long current = new Date().getTime();
+        long timeDiff = current - start;
+        timeDiff = timeDiff / 1000;
+        int seconds = (int) (timeDiff % 60);
+        timeDiff = timeDiff / 60;
+        int mins = (int) (timeDiff % 60);
+        timeDiff = timeDiff / 60;
+        int hours = (int) (timeDiff % 24);
+        timeDiff = timeDiff / 24;
+        String upTime = timeDiff + "d " + hours + "h " + mins + "m " + seconds + "s ";
+        return upTime;
+    }
+
+    private static String getHostInfo() {
+        InetAddress ip;
+        String hostname;
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+            return hostname + "(" + ip.getHostAddress() + ")";
+        } catch (UnknownHostException e) {
+            return "Unknown Host";
+        }
+    }
+
+    @Override
+    public BotConfig getBotConfig() {
+        return appModel.getBotConfig();
+    }
+
+    public Message onReceivingMessage(TelegramBot bot, Message message) {
+        Message appModelReponseMessage = appModel.onReceivingMessage(bot, message);
+        if (appModelReponseMessage != null) {
+            return appModelReponseMessage;
         }
         try {
-            long[] admins = tBotConfig.getAdminIdList();
+            long[] admins = botConfig.getAdminIdList();
             if ((admins != null) && (admins.length > 0)) {
                 for (long admin : admins) {
                     try {
-                        tBotService.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
+                        bot.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
                                 message.getMessage_id());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                return tBotService.sendMessage(new ChatId(message.getChat().getId()),
+                return bot.sendMessage(new ChatId(message.getChat().getId()),
                         "Hey " + message.getFrom().getFirst_name()
                                 + ",Your request was taken. I'll get back to you ASAP.",
                         ParseMode.None, false, message.getMessage_id());
             } else {
-                return tBotService.sendMessage(new ChatId(message.getChat().getId()),
+                return bot.sendMessage(new ChatId(message.getChat().getId()),
                         "The support team is unavailable. Please try later.", ParseMode.None, false,
                         message.getMessage_id());
             }
@@ -68,35 +90,38 @@ public class DefaultBotModel implements TBotModel {
         }
     }
 
-    public Message onMessageFromAdmin(TelegramBot tBotService, Message message) {
-        if (appModel != null) {
-            Message appModelReponseMessage = appModel.onMessageFromAdmin(tBotService, message);
-            if (appModelReponseMessage != null) {
-                return appModelReponseMessage;
-            }
+    @Override
+    public boolean onInlineQuery(TelegramBot bot, InlineQuery query) {
+        return appModel.onInlineQuery(bot, query);
+    }
+
+    public Message onMessageFromAdmin(TelegramBot bot, Message message) {
+        Message appModelReponseMessage = appModel.onMessageFromAdmin(bot, message);
+        if (appModelReponseMessage != null) {
+            return appModelReponseMessage;
         }
         try {
             long replyToUser = message.getReply_to_message().getForward_from().getId();
             if (replyToUser > 0) {
                 if (message.getText() != null) {
-                    return tBotService.sendMessage(new ChatId(replyToUser), message.getText());
+                    return bot.sendMessage(new ChatId(replyToUser), message.getText());
                 } else if (message.getDocument() != null) {
-                    return tBotService.sendDocument(new ChatId(replyToUser),
+                    return bot.sendDocument(new ChatId(replyToUser),
                             new TelegramFile(message.getDocument().getFile_id()));
                 } else if (message.getVideo() != null) {
-                    return tBotService.sendVideo(new ChatId(replyToUser),
+                    return bot.sendVideo(new ChatId(replyToUser),
                             new TelegramFile(message.getVideo().getFile_id()));
                 } else if (message.getPhoto() != null) {
-                    return tBotService.sendPhoto(new ChatId(replyToUser),
+                    return bot.sendPhoto(new ChatId(replyToUser),
                             new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
                 } else if (message.getAudio() != null) {
-                    return tBotService.sendDocument(new ChatId(replyToUser),
+                    return bot.sendDocument(new ChatId(replyToUser),
                             new TelegramFile(message.getDocument().getFile_id()));
                 } else if (message.getVoice() != null) {
-                    return tBotService.sendDocument(new ChatId(replyToUser),
+                    return bot.sendDocument(new ChatId(replyToUser),
                             new TelegramFile(message.getDocument().getFile_id()));
                 } else if (message.getSticker() != null) {
-                    return tBotService.sendDocument(new ChatId(replyToUser),
+                    return bot.sendDocument(new ChatId(replyToUser),
                             new TelegramFile(message.getDocument().getFile_id()));
                 }
             }
@@ -133,44 +158,42 @@ public class DefaultBotModel implements TBotModel {
                 ParseMode.Markdown);
     }
 
-    public Message onCommand(TelegramBot tBotService, Message message) {
-        if (appModel != null) {
-            Message appModelReponseMessage = appModel.onCommand(tBotService, message);
-            if (appModelReponseMessage != null) {
-                return appModelReponseMessage;
-            }
+    public Message onCommand(TelegramBot bot, Message message) {
+        Message appModelReponseMessage = appModel.onCommand(bot, message);
+        if (appModelReponseMessage != null) {
+            return appModelReponseMessage;
         }
         switch (message.getText()) {
             case "/start":
-                if (tBotConfig.isValidCommand("/start")) {
+                if (botConfig.isValidCommand("/start")) {
                     try {
-                        return onStartAndHelp(tBotService, message);
+                        return onStartAndHelp(bot, message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             case "/help":
-                if (tBotConfig.isValidCommand("/help")) {
+                if (botConfig.isValidCommand("/help")) {
                     try {
-                        return onStartAndHelp(tBotService, message);
+                        return onStartAndHelp(bot, message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             case "/scr":
-                if (tBotConfig.isValidCommand("/scr") && tBotConfig.isAdmin(message.getChat().getId())) {
+                if (botConfig.isValidCommand("/scr") && botConfig.isAdmin(message.getChat().getId())) {
                     try {
-                        tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
                         File screenShotFile = getCurrentScreenShotFile();
                         if (screenShotFile != null) {
-                            Message returMessage = tBotService.sendDocument(new ChatId(message.getChat().getId()),
+                            Message returMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
                                     new TelegramFile(screenShotFile));
                             screenShotFile.delete();
                             return returMessage;
                         }
-                        return tBotService.sendMessage(new ChatId(message.getChat().getId()),
+                        return bot.sendMessage(new ChatId(message.getChat().getId()),
                                 "I couldn't take a screenshot right now. I'm sorry.");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -178,10 +201,10 @@ public class DefaultBotModel implements TBotModel {
                 }
                 break;
             case "/status":
-                if (tBotConfig.isValidCommand("/status") && tBotConfig.isAdmin(message.getChat().getId())) {
+                if (botConfig.isValidCommand("/status") && botConfig.isAdmin(message.getChat().getId())) {
                     try {
-                        tBotService.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
-                        return sendStatusMessage(tBotService, message.getChat().getId());
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+                        return sendStatusMessage(bot, message.getChat().getId());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -193,43 +216,14 @@ public class DefaultBotModel implements TBotModel {
         return null;
     }
 
-    private static String getUpTime() {
-        long start = startTime.getTime();
-        long current = new Date().getTime();
-        long timeDiff = current - start;
-        timeDiff = timeDiff / 1000;
-        int seconds = (int) (timeDiff % 60);
-        timeDiff = timeDiff / 60;
-        int mins = (int) (timeDiff % 60);
-        timeDiff = timeDiff / 60;
-        int hours = (int) (timeDiff % 24);
-        timeDiff = timeDiff / 24;
-        String upTime = timeDiff + "d " + hours + "h " + mins + "m " + seconds + "s ";
-        return upTime;
-    }
-
-    private static String getHostInfo() {
-        InetAddress ip;
-        String hostname;
-        try {
-            ip = InetAddress.getLocalHost();
-            hostname = ip.getHostName();
-            return hostname + "(" + ip.getHostAddress() + ")";
-        } catch (UnknownHostException e) {
-            return "Unknown Host";
-        }
-    }
-
     @Override
-    public Message sendStatusMessage(TelegramBot tBotService, long chatId) {
-        if (appModel != null) {
-            Message appModelReponseMessage = appModel.sendStatusMessage(tBotService, chatId);
-            if (appModelReponseMessage != null) {
-                return appModelReponseMessage;
-            }
+    public Message sendStatusMessage(TelegramBot bot, long chatId) {
+        Message appModelReponseMessage = appModel.sendStatusMessage(bot, chatId);
+        if (appModelReponseMessage != null) {
+            return appModelReponseMessage;
         }
         try {
-            return tBotService.sendMessage(new ChatId(chatId),
+            return bot.sendMessage(new ChatId(chatId),
                     "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
         } catch (IOException e) {
             e.printStackTrace();
