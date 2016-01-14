@@ -10,7 +10,7 @@ public class BotLauncher {
         if (configList != null) {
             for (BotConfig conf : configList) {
                 try {
-                    Class<?> clazz = Class.forName(conf.getBotModelclassName());
+                    Class<?> clazz = Class.forName(conf.getBotModelClassName());
                     Constructor<?> ctor = null;
                     if (clazz != null) {
                         ctor = clazz.getConstructor();

@@ -17,7 +17,7 @@ public class BotConfig {
 
     private static Map<File, BotConfig[]> fileConfigListMap;
 
-    private String botModelclassName;
+    private String botModelClassName;
     private String botApiToken;
     private String[] commandList;
     private int threadCount;
@@ -25,27 +25,27 @@ public class BotConfig {
     private long reportIntervalInSeconds;
     private Map<String, String> constants;
 
-    public BotConfig(String botModelclassName, String botApiToken, String[] commandList, long[] adminIdList,
+    public BotConfig(String botModelClassName, String botApiToken, String[] commandList, long[] adminIdList,
                      long reportIntervalInSeconds, int threadCount) {
-        initTBotConfig(botModelclassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds,
+        initTBotConfig(botModelClassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds,
                 threadCount);
     }
 
-    public BotConfig(String botModelclassName, String botApiToken, String[] commandList, long[] adminIdList,
+    public BotConfig(String botModelClassName, String botApiToken, String[] commandList, long[] adminIdList,
                      long reportIntervalInSeconds) {
-        initTBotConfig(botModelclassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds, 0);
+        initTBotConfig(botModelClassName, botApiToken, commandList, adminIdList, reportIntervalInSeconds, 0);
     }
 
-    public BotConfig(String botModelclassName, String botApiToken, String[] commandList, long[] adminIdList) {
-        initTBotConfig(botModelclassName, botApiToken, commandList, adminIdList, 0, 0);
+    public BotConfig(String botModelClassName, String botApiToken, String[] commandList, long[] adminIdList) {
+        initTBotConfig(botModelClassName, botApiToken, commandList, adminIdList, 0, 0);
     }
 
-    public BotConfig(String botModelclassName, String botApiToken, String[] commandList) {
-        initTBotConfig(botModelclassName, botApiToken, commandList, null, 0, 0);
+    public BotConfig(String botModelClassName, String botApiToken, String[] commandList) {
+        initTBotConfig(botModelClassName, botApiToken, commandList, null, 0, 0);
     }
 
-    public BotConfig(String botModelclassName, String botApiToken) {
-        initTBotConfig(botModelclassName, botApiToken, null, null, 0, 0);
+    public BotConfig(String botModelClassName, String botApiToken) {
+        initTBotConfig(botModelClassName, botApiToken, null, null, 0, 0);
     }
 
     private static boolean isBotAlreadyInUse(ArrayList<BotConfig> fileConfigs, String botApiToken) {
@@ -84,7 +84,7 @@ public class BotConfig {
         BotConfig[] configList = getFileConfigList(configFile);
         if (configList != null) {
             for (BotConfig config : configList) {
-                if (config.getBotModelclassName().equals(className)) {
+                if (config.getBotModelClassName().equals(className)) {
                     return config;
                 }
             }
@@ -122,7 +122,7 @@ public class BotConfig {
                         if ((fileConfigArray[i].getBotApiToken() != null)
                                 && (!fileConfigArray[i].getBotApiToken().isEmpty())
                                 && (!isBotAlreadyInUse(fileConfigList, fileConfigArray[i].getBotApiToken()))
-                                && isClassExistInClassPath(fileConfigArray[i].getBotModelclassName())) {
+                                && isClassExistInClassPath(fileConfigArray[i].getBotModelClassName())) {
                             fileConfigList.add(fileConfigArray[i]);
                             fileConfigArray[i].initDefaults();
                         }
@@ -140,7 +140,7 @@ public class BotConfig {
 
     private void initTBotConfig(String botLauncherclassName, String botApiToken, String[] commandList,
                                 long[] adminIdList, long reportIntervalInSeconds, int threadCount) {
-        this.botModelclassName = botLauncherclassName;
+        this.botModelClassName = botLauncherclassName;
         this.botApiToken = botApiToken;
         this.commandList = commandList;
         this.adminIdList = adminIdList;
@@ -243,8 +243,8 @@ public class BotConfig {
         return threadCount;
     }
 
-    public String getBotModelclassName() {
-        return botModelclassName;
+    public String getBotModelClassName() {
+        return botModelClassName;
     }
 
 }
