@@ -1,16 +1,12 @@
-package me.shib.java.lib.telegram.bot.run;
-
-import me.shib.java.lib.telegram.bot.easybot.BotModel;
-import me.shib.java.lib.telegram.bot.easybot.BotConfig;
-import me.shib.java.lib.telegram.bot.easybot.BotWorker;
+package me.shib.java.lib.telegram.bot.easybot;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
-public class LaunchBots {
+public class BotLauncher {
 
     public static void launchBots(BotConfig[] configList) {
-        ArrayList<BotWorker> botWorkers = new ArrayList<BotWorker>();
+        ArrayList<TBotWorker> botWorkers = new ArrayList<TBotWorker>();
         if (configList != null) {
             for (BotConfig conf : configList) {
                 try {
@@ -21,10 +17,10 @@ public class LaunchBots {
                     }
                     if (ctor != null) {
                         int threadCount = conf.getThreadCount();
-                        BotWorker[] workers = new BotWorker[threadCount];
+                        TBotWorker[] workers = new TBotWorker[threadCount];
                         for (int i = 0; i < threadCount; i++) {
                             Object object = ctor.newInstance();
-                            workers[i] = new BotWorker((BotModel) object);
+                            workers[i] = new TBotWorker((BotModel) object);
                             botWorkers.add(workers[i]);
                             workers[i].start();
                         }

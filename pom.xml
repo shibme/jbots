@@ -5,13 +5,13 @@
 
     <groupId>me.shib.java.lib</groupId>
     <artifactId>easy-tbot</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <name>Easy TBot Framework</name>
     <description>A framework for creating Telegram Bots with the hard parts done already</description>
-    <url>https://github.com/shiblymeeran/easy-tbot</url>
+    <url>https://github.com/shibme/easy-tbot</url>
 
     <issueManagement>
-        <url>https://github.com/shiblymeeran/easy-tbot/issues</url>
+        <url>https://github.com/shibme/easy-tbot/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
@@ -24,17 +24,17 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/shiblymeeran/easy-tbot</url>
-        <connection>scm:git:https://github.com/shiblymeeran/easy-tbot.git</connection>
-        <developerConnection>scm:git:shiblymeeran@github.com:shiblymeeran/easy-tbot.git</developerConnection>
+        <url>https://github.com/shibme/easy-tbot</url>
+        <connection>scm:git:https://github.com/shibme/easy-tbot.git</connection>
+        <developerConnection>scm:git:shibme@github.com:shibme/easy-tbot.git</developerConnection>
     </scm>
 
     <developers>
         <developer>
             <email>shibly.meeran@gmail.com</email>
             <name>Shibly Meeran</name>
-            <url>https://github.com/shiblymeeran</url>
-            <id>shiblymeeran</id>
+            <url>https://github.com/shibme</url>
+            <id>shibme</id>
         </developer>
     </developers>
 
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>me.shib.java.lib</groupId>
             <artifactId>telegram-bot-java</artifactId>
-            <version>1.3.0</version>
+            <version>1.3.1</version>
         </dependency>
     </dependencies>
 

@@ -11,6 +11,6 @@ Add to your pom.xml:
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>easy-tbot</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 </dependency>
 ```

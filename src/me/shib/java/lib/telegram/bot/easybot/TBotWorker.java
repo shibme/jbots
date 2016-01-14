@@ -5,7 +5,7 @@ import me.shib.java.lib.telegram.bot.types.InlineQuery;
 import me.shib.java.lib.telegram.bot.types.Message;
 import me.shib.java.lib.telegram.bot.types.Update;
 
-public class BotWorker extends Thread {
+public class TBotWorker extends Thread {
 
     private static int threadCounter = 0;
     private BotConfig botConfig;
@@ -14,20 +14,20 @@ public class BotWorker extends Thread {
     private int threadNumber;
     private BotModel defaultModel;
 
-    public BotWorker(BotModel tBotModel) {
-        initTBotWorker(tBotModel);
+    public TBotWorker(BotModel botModel) {
+        initTBotWorker(botModel);
     }
 
     public synchronized int getThreadNumber() {
         if (this.threadNumber < 1) {
-            BotWorker.threadCounter++;
-            this.threadNumber = BotWorker.threadCounter;
+            TBotWorker.threadCounter++;
+            this.threadNumber = TBotWorker.threadCounter;
         }
         return this.threadNumber;
     }
 
     private void initTBotWorker(BotModel botModel) {
-        this.botConfig = botModel.getBotConfig();
+        this.botConfig = botModel.thisConfig();
         if ((botConfig.getBotApiToken() != null) && (!botConfig.getBotApiToken().isEmpty())) {
             bot = TelegramBot.getInstance(botConfig.getBotApiToken());
             updateReceiver = UpdateReceiver.getDefaultInstance(this.botConfig.getBotApiToken());
@@ -36,7 +36,7 @@ public class BotWorker extends Thread {
     }
 
     public void startBotWork() {
-        BotSweeper.startDefaultInstance(defaultModel);
+        TBotSweeper.startDefaultInstance(defaultModel);
         updateReceiver.onBotStart();
         System.out.println("Starting thread " + getThreadNumber() + " with " + updateReceiver.whoAmI().getUsername());
         while (true) {

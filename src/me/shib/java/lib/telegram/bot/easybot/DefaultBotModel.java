@@ -23,7 +23,7 @@ public class DefaultBotModel extends BotModel {
 
     protected DefaultBotModel(BotModel appModel) {
         this.appModel = appModel;
-        this.botConfig = appModel.getBotConfig();
+        this.botConfig = appModel.thisConfig();
         this.myIdentity = UpdateReceiver.getDefaultInstance(this.botConfig.getBotApiToken()).whoAmI();
     }
 
@@ -55,8 +55,8 @@ public class DefaultBotModel extends BotModel {
     }
 
     @Override
-    public BotConfig getBotConfig() {
-        return appModel.getBotConfig();
+    public BotConfig thisConfig() {
+        return appModel.thisConfig();
     }
 
     public Message onReceivingMessage(TelegramBot bot, Message message) {
