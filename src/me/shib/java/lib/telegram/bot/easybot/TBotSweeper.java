@@ -14,13 +14,13 @@ public class TBotSweeper extends Thread {
     private TelegramBot sweeperTelegramBot;
 
     private TBotSweeper(BotModel defaultModel) {
-        this.botConfig = defaultModel.thisConfig();
+        this.botConfig = defaultModel.getConfig();
         this.defaultModel = defaultModel;
         this.sweeperTelegramBot = TelegramBot.getInstance(this.botConfig.getBotApiToken());
     }
 
     private static synchronized TBotSweeper getDefaultInstance(BotModel defaultModel) {
-        String botApiToken = defaultModel.thisConfig().getBotApiToken();
+        String botApiToken = defaultModel.getConfig().getBotApiToken();
         if (botApiToken == null) {
             return null;
         }
@@ -49,7 +49,7 @@ public class TBotSweeper extends Thread {
             while (true) {
                 try {
                     for (long admin : adminIdList) {
-                        this.defaultModel.sendStatusMessage(sweeperTelegramBot, admin);
+                        this.defaultModel.sendStatusMessage(admin);
                     }
                     Thread.sleep(intervals);
                 } catch (Exception e) {

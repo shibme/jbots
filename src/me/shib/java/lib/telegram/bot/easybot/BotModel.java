@@ -9,36 +9,28 @@ public abstract class BotModel {
     private BotConfig botConfig;
     private TelegramBot bot;
 
-    public BotConfig thisConfig() {
+    public BotConfig getConfig() {
         if (botConfig == null) {
             botConfig = BotConfig.getConfigForClassName(this.getClass().getName());
         }
         return botConfig;
     }
 
-    public BotConfig getConfig() {
-        return thisConfig();
-    }
-
-    public TelegramBot thisBot() {
+    public TelegramBot getBot() {
         if (bot == null) {
-            bot = TelegramBot.getInstance(thisConfig().getBotApiToken());
+            bot = TelegramBot.getInstance(getConfig().getBotApiToken());
         }
         return bot;
     }
 
-    public TelegramBot getBot() {
-        return thisBot();
-    }
+    public abstract Message onMessageFromAdmin(Message message);
 
-    public abstract Message onMessageFromAdmin(TelegramBot bot, Message message);
+    public abstract Message onCommand(Message message);
 
-    public abstract Message onCommand(TelegramBot bot, Message message);
+    public abstract Message onReceivingMessage(Message message);
 
-    public abstract Message onReceivingMessage(TelegramBot bot, Message message);
+    public abstract boolean onInlineQuery(InlineQuery query);
 
-    public abstract boolean onInlineQuery(TelegramBot bot, InlineQuery query);
-
-    public abstract Message sendStatusMessage(TelegramBot bot, long chatId);
+    public abstract Message sendStatusMessage(long chatId);
 
 }
