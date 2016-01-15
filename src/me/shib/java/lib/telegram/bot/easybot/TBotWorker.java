@@ -56,8 +56,10 @@ public class TBotWorker extends Thread {
                         defaultModel.onReceivingMessage(message);
                     }
                 } else if (update.getInline_query() != null) {
-                    InlineQuery query = update.getInline_query();
-                    defaultModel.onInlineQuery(query);
+                    defaultModel.onInlineQuery(update.getInline_query());
+                }
+                else if(update.getChosen_inline_result() != null) {
+                    defaultModel.onChosenInlineResult(update.getChosen_inline_result());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
