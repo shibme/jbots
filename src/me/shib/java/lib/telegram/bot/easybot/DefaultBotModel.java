@@ -60,9 +60,9 @@ public class DefaultBotModel extends BotModel {
 
     public Message onReceivingMessage(Message message) {
         TelegramBot bot = getBot();
-        Message appModelReponseMessage = appModel.onReceivingMessage(message);
-        if (appModelReponseMessage != null) {
-            return appModelReponseMessage;
+        Message appModelResponseMessage = appModel.onReceivingMessage(message);
+        if (appModelResponseMessage != null) {
+            return appModelResponseMessage;
         }
         try {
             long[] admins = botConfig.getAdminIdList();
@@ -97,9 +97,9 @@ public class DefaultBotModel extends BotModel {
 
     public Message onMessageFromAdmin(Message message) {
         TelegramBot bot = getBot();
-        Message appModelReponseMessage = appModel.onMessageFromAdmin(message);
-        if (appModelReponseMessage != null) {
-            return appModelReponseMessage;
+        Message appModelResponseMessage = appModel.onMessageFromAdmin(message);
+        if (appModelResponseMessage != null) {
+            return appModelResponseMessage;
         }
         try {
             long replyToUser = message.getReply_to_message().getForward_from().getId();
@@ -161,9 +161,9 @@ public class DefaultBotModel extends BotModel {
 
     public Message onCommand(Message message) {
         TelegramBot bot = getBot();
-        Message appModelReponseMessage = appModel.onCommand(message);
-        if (appModelReponseMessage != null) {
-            return appModelReponseMessage;
+        Message appModelResponseMessage = appModel.onCommand(message);
+        if (appModelResponseMessage != null) {
+            return appModelResponseMessage;
         }
         switch (message.getText()) {
             case "/start":
@@ -190,10 +190,10 @@ public class DefaultBotModel extends BotModel {
                         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
                         File screenShotFile = getCurrentScreenShotFile();
                         if (screenShotFile != null) {
-                            Message returMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
+                            Message returnMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
                                     new TelegramFile(screenShotFile));
                             screenShotFile.delete();
-                            return returMessage;
+                            return returnMessage;
                         }
                         return bot.sendMessage(new ChatId(message.getChat().getId()),
                                 "I couldn't take a screenshot right now. I'm sorry.");
@@ -212,7 +212,25 @@ public class DefaultBotModel extends BotModel {
                     }
                 }
                 break;
-            default:
+            case "/usermode":
+                if (botConfig.isValidCommand("/usermode") && botConfig.isAdmin(message.getChat().getId())) {
+                    botConfig.setUserMode(message.getFrom().getId());
+                    try {
+                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case "/adminmode":
+                if (botConfig.isValidCommand("/adminmode") && botConfig.isAdmin(message.getChat().getId())) {
+                    botConfig.setAdminMode(message.getFrom().getId());
+                    try {
+                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
         }
         return null;
@@ -221,9 +239,9 @@ public class DefaultBotModel extends BotModel {
     @Override
     public Message sendStatusMessage(long chatId) {
         TelegramBot bot = getBot();
-        Message appModelReponseMessage = appModel.sendStatusMessage(chatId);
-        if (appModelReponseMessage != null) {
-            return appModelReponseMessage;
+        Message appModelResponseMessage = appModel.sendStatusMessage(chatId);
+        if (appModelResponseMessage != null) {
+            return appModelResponseMessage;
         }
         try {
             return bot.sendMessage(new ChatId(chatId),

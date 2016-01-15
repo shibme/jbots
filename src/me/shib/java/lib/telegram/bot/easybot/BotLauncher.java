@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class BotLauncher {
 
     public static void launchBots(BotConfig[] configList) {
-        ArrayList<TBotWorker> botWorkers = new ArrayList<TBotWorker>();
+        ArrayList<TBotWorker> botWorkers = new ArrayList<>();
         if (configList != null) {
             for (BotConfig conf : configList) {
                 try {
@@ -33,7 +33,7 @@ public class BotLauncher {
     }
 
     public static void main(String[] args) {
-        BotConfig[] configList = BotConfig.getFileConfigList();
+        BotConfig[] configList = BotConfig.getAllConfigList();
         launchBots(configList);
     }
 }

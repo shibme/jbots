@@ -43,14 +43,14 @@ public class TBotWorker extends Thread {
                 Update update = updateReceiver.getUpdate();
                 if (update.getMessage() != null) {
                     Message message = update.getMessage();
-                    long senderId = message.getChat().getId();
-                    Message adminResponseMessage = null;
-                    if (botConfig.isAdmin(senderId)) {
-                        adminResponseMessage = defaultModel.onMessageFromAdmin(message);
-                    }
+                    boolean adminIdValid = (botConfig.isAdmin(message.getChat().getId()) || botConfig.isAdmin(message.getFrom().getId()));
                     Message commandResponseMessage = null;
-                    if ((adminResponseMessage == null) && (botConfig.isValidCommand(message.getText()))) {
+                    if (botConfig.isValidCommand(message.getText())) {
                         commandResponseMessage = defaultModel.onCommand(message);
+                    }
+                    Message adminResponseMessage = null;
+                    if ((commandResponseMessage == null) && adminIdValid && (!botConfig.isUserMode(message.getFrom().getId()))) {
+                        adminResponseMessage = defaultModel.onMessageFromAdmin(message);
                     }
                     if ((adminResponseMessage == null) && (commandResponseMessage == null)) {
                         defaultModel.onReceivingMessage(message);

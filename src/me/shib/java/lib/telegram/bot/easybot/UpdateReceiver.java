@@ -5,10 +5,7 @@ import me.shib.java.lib.telegram.bot.types.Update;
 import me.shib.java.lib.telegram.bot.types.User;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class UpdateReceiver {
 
@@ -40,9 +37,7 @@ public class UpdateReceiver {
     private synchronized void fillUpdatesQueue() {
         try {
             Update[] updates = bot.getUpdates();
-            for (Update u : updates) {
-                updatesQueue.add(u);
-            }
+            Collections.addAll(updatesQueue, updates);
         } catch (IOException e) {
             e.printStackTrace();
         }
