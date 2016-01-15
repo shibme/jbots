@@ -20,11 +20,13 @@ public class DefaultBotModel extends BotModel {
     private BotConfig botConfig;
     private User myIdentity;
     private BotModel appModel;
+    private TelegramBot bot;
 
     protected DefaultBotModel(BotModel appModel) {
         this.appModel = appModel;
         this.botConfig = appModel.getConfig();
         this.myIdentity = UpdateReceiver.getDefaultInstance(this.botConfig.getBotApiToken()).whoAmI();
+        bot = getBot();
     }
 
     private static String getUpTime() {
@@ -59,7 +61,6 @@ public class DefaultBotModel extends BotModel {
     }
 
     public Message onReceivingMessage(Message message) {
-        TelegramBot bot = getBot();
         Message appModelResponseMessage = appModel.onReceivingMessage(message);
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
@@ -90,13 +91,7 @@ public class DefaultBotModel extends BotModel {
         }
     }
 
-    @Override
-    public boolean onInlineQuery(InlineQuery query) {
-        return appModel.onInlineQuery(query);
-    }
-
     public Message onMessageFromAdmin(Message message) {
-        TelegramBot bot = getBot();
         Message appModelResponseMessage = appModel.onMessageFromAdmin(message);
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
@@ -151,7 +146,7 @@ public class DefaultBotModel extends BotModel {
         }
     }
 
-    private Message onStartAndHelp(TelegramBot bot, Message message) throws IOException {
+    private Message onStartAndHelp(Message message) throws IOException {
         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + myIdentity.getFirst_name() + "* (@"
@@ -160,7 +155,6 @@ public class DefaultBotModel extends BotModel {
     }
 
     public Message onCommand(Message message) {
-        TelegramBot bot = getBot();
         Message appModelResponseMessage = appModel.onCommand(message);
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
@@ -169,7 +163,7 @@ public class DefaultBotModel extends BotModel {
             case "/start":
                 if (botConfig.isValidCommand("/start")) {
                     try {
-                        return onStartAndHelp(bot, message);
+                        return onStartAndHelp(message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -178,7 +172,7 @@ public class DefaultBotModel extends BotModel {
             case "/help":
                 if (botConfig.isValidCommand("/help")) {
                     try {
-                        return onStartAndHelp(bot, message);
+                        return onStartAndHelp(message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -237,8 +231,17 @@ public class DefaultBotModel extends BotModel {
     }
 
     @Override
+    public boolean onInlineQuery(InlineQuery query) {
+        return appModel.onInlineQuery(query);
+    }
+
+    @Override
+    public boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
+        return appModel.onChosenInlineResult(chosenInlineResult);
+    }
+
+    @Override
     public Message sendStatusMessage(long chatId) {
-        TelegramBot bot = getBot();
         Message appModelResponseMessage = appModel.sendStatusMessage(chatId);
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;

@@ -1,6 +1,7 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
 import me.shib.java.lib.telegram.bot.service.TelegramBot;
+import me.shib.java.lib.telegram.bot.types.ChosenInlineResult;
 import me.shib.java.lib.telegram.bot.types.InlineQuery;
 import me.shib.java.lib.telegram.bot.types.Message;
 
@@ -30,6 +31,8 @@ public abstract class BotModel {
     public abstract Message onReceivingMessage(Message message);
 
     public abstract boolean onInlineQuery(InlineQuery query);
+
+    public abstract boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult);
 
     public abstract Message sendStatusMessage(long chatId);
 
