@@ -57,10 +57,26 @@ public class BotConfig {
         return configList.toArray(configArray);
     }
 
-    public static synchronized void addFileToConfigList(File configFile) {
+    public static synchronized void addJSONtoConfig(String json) {
         if (configMap == null) {
             configMap = new HashMap<>();
         }
+        if (json != null) {
+            BotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(json, BotConfig[].class);
+            if (configArray != null) {
+                for (BotConfig configItem : configArray) {
+                    if ((configItem.getBotApiToken() != null)
+                            && (!configItem.getBotApiToken().isEmpty())
+                            && isValidClassName(configItem.getBotModelClassName())) {
+                        configItem.initDefaults();
+                        configMap.put(configItem.getBotModelClassName(), configItem);
+                    }
+                }
+            }
+        }
+    }
+
+    public static synchronized void addFileToConfigList(File configFile) {
         if ((configFile != null) && configFile.exists()) {
             try {
                 StringBuilder jsonBuilder = new StringBuilder();
@@ -74,17 +90,7 @@ public class BotConfig {
                     }
                 }
                 br.close();
-                BotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(jsonBuilder.toString(), BotConfig[].class);
-                if (configArray != null) {
-                    for (BotConfig configItem : configArray) {
-                        if ((configItem.getBotApiToken() != null)
-                                && (!configItem.getBotApiToken().isEmpty())
-                                && isValidClassName(configItem.getBotModelClassName())) {
-                            configItem.initDefaults();
-                            configMap.put(configItem.getBotModelClassName(), configItem);
-                        }
-                    }
-                }
+                addJSONtoConfig(jsonBuilder.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

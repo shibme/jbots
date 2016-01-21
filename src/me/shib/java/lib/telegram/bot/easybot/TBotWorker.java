@@ -1,6 +1,5 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
-import me.shib.java.lib.telegram.bot.types.InlineQuery;
 import me.shib.java.lib.telegram.bot.types.Message;
 import me.shib.java.lib.telegram.bot.types.Update;
 
@@ -57,8 +56,7 @@ public class TBotWorker extends Thread {
                     }
                 } else if (update.getInline_query() != null) {
                     defaultModel.onInlineQuery(update.getInline_query());
-                }
-                else if(update.getChosen_inline_result() != null) {
+                } else if (update.getChosen_inline_result() != null) {
                     defaultModel.onChosenInlineResult(update.getChosen_inline_result());
                 }
             } catch (Exception e) {

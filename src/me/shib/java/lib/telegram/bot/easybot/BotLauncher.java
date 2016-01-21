@@ -1,5 +1,9 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
+import me.shib.java.lib.rest.client.ServiceAdapter;
+import me.shib.java.lib.rest.client.ServiceResponse;
+
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
@@ -33,7 +37,23 @@ public class BotLauncher {
     }
 
     public static void main(String[] args) {
-        BotConfig[] configList = BotConfig.getAllConfigList();
-        launchBots(configList);
+        if (args.length <= 1) {
+            if (args.length == 1) {
+                String configJson = null;
+                try {
+                    ServiceAdapter adapter = new ServiceAdapter(args[0]);
+                    ServiceResponse response = adapter.get(null);
+                    if (response.getStatusCode() == 200) {
+                        configJson = response.getResponse();
+                    }
+                } catch (IOException ignored) {
+                }
+                BotConfig.addJSONtoConfig(configJson);
+            }
+            BotConfig[] configList = BotConfig.getAllConfigList();
+            launchBots(configList);
+        } else {
+            System.out.println("Please provide valid arguments.");
+        }
     }
 }
