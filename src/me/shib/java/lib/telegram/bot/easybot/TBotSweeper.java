@@ -9,17 +9,17 @@ public class TBotSweeper extends Thread {
 
     private static Map<String, TBotSweeper> tBotSweeperMap;
 
-    private BotModel defaultModel;
+    private DefaultBotModel defaultModel;
     private BotConfig botConfig;
     private TelegramBot sweeperTelegramBot;
 
-    private TBotSweeper(BotModel defaultModel) {
+    private TBotSweeper(DefaultBotModel defaultModel) {
         this.botConfig = defaultModel.getConfig();
         this.defaultModel = defaultModel;
         this.sweeperTelegramBot = TelegramBot.getInstance(this.botConfig.getBotApiToken());
     }
 
-    private static synchronized TBotSweeper getDefaultInstance(BotModel defaultModel) {
+    private static synchronized TBotSweeper getDefaultInstance(DefaultBotModel defaultModel) {
         String botApiToken = defaultModel.getConfig().getBotApiToken();
         if (botApiToken == null) {
             return null;
@@ -35,7 +35,7 @@ public class TBotSweeper extends Thread {
         return tBotSwp;
     }
 
-    protected static synchronized void startDefaultInstance(BotModel defaultModel) {
+    protected static synchronized void startDefaultInstance(DefaultBotModel defaultModel) {
         TBotSweeper defaultSweeper = TBotSweeper.getDefaultInstance(defaultModel);
         if ((!defaultSweeper.isAlive()) && (defaultSweeper.getState() != State.TERMINATED)) {
             defaultSweeper.start();

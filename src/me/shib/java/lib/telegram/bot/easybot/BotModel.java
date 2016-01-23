@@ -7,20 +7,13 @@ import me.shib.java.lib.telegram.bot.types.Message;
 
 public abstract class BotModel {
 
-    private BotConfig botConfig;
     private TelegramBot bot;
 
-    public BotConfig getConfig() {
-        if (botConfig == null) {
-            botConfig = BotConfig.getConfigForClassName(this.getClass().getName());
-        }
-        return botConfig;
+    public BotModel(BotConfig config) {
+        this.bot = TelegramBot.getInstance(config.getBotApiToken());
     }
 
     public TelegramBot getBot() {
-        if (bot == null) {
-            bot = TelegramBot.getInstance(getConfig().getBotApiToken());
-        }
         return bot;
     }
 

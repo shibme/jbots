@@ -10,7 +10,7 @@ import java.util.*;
 
 public class BotConfig {
 
-    private static final String defaultConfigFilePath = "easy-tbot-config.json";
+    private static final File defaultConfigFile = new File("easy-tbot-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
     private static Map<String, BotConfig> configMap;
@@ -24,10 +24,11 @@ public class BotConfig {
     private Map<String, String> constants;
     private Set<String> userModeSet;
 
-    private BotConfig(String botModelClassName, String botApiToken) {
-        this.botModelClassName = botModelClassName;
+    public BotConfig(String botApiToken, Class<BotModel> botModelClass) {
+        this.botModelClassName = botModelClass.getName();
         this.botApiToken = botApiToken;
         adminIdList = null;
+        initDefaults();
     }
 
     private static boolean isValidClassName(String className) {
@@ -41,26 +42,26 @@ public class BotConfig {
         return false;
     }
 
-    public static synchronized BotConfig getConfigForClassName(String className) {
-        if (configMap == null) {
-            addFileToConfigList(new File(BotConfig.defaultConfigFilePath));
-        }
-        return configMap.get(className);
-    }
-
     public static synchronized BotConfig[] getAllConfigList() {
         if (configMap == null) {
-            addFileToConfigList(new File(BotConfig.defaultConfigFilePath));
+            addFileToConfigList(defaultConfigFile);
+        }
+        if (configMap == null) {
+            return null;
         }
         ArrayList<BotConfig> configList = new ArrayList<>(configMap.values());
         BotConfig[] configArray = new BotConfig[configList.size()];
         return configList.toArray(configArray);
     }
 
-    public static synchronized void addJSONtoConfig(String json) {
+    public static void addConfigToList(BotConfig config) {
         if (configMap == null) {
             configMap = new HashMap<>();
         }
+        configMap.put(config.getBotApiToken(), config);
+    }
+
+    public static synchronized void addJSONtoConfigList(String json) {
         if (json != null) {
             BotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(json, BotConfig[].class);
             if (configArray != null) {
@@ -69,7 +70,7 @@ public class BotConfig {
                             && (!configItem.getBotApiToken().isEmpty())
                             && isValidClassName(configItem.getBotModelClassName())) {
                         configItem.initDefaults();
-                        configMap.put(configItem.getBotModelClassName(), configItem);
+                        addConfigToList(configItem);
                     }
                 }
             }
@@ -90,7 +91,7 @@ public class BotConfig {
                     }
                 }
                 br.close();
-                addJSONtoConfig(jsonBuilder.toString());
+                addJSONtoConfigList(jsonBuilder.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

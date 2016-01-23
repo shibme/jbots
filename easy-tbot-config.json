@@ -1,7 +1,7 @@
 [
 	{
-		"botModelClassName": "com.example.TBotModelClass1",
 		"botApiToken": "YourBotApiTokenGoesHere",
+		"botModelClassName": "com.example.TBotModelClass1",
 		"commandList": ["/start","/help","/status","/scr","/usermode","/adminmode"],
 		"threadCount": 4,
 		"adminIdList": [1111111111111111, 1111111111111111],
@@ -12,11 +12,11 @@
 		}
 	},
 	{
-		"botModelClassName": "com.example.TBotModelClass2",
 		"botApiToken": "YourBotApiTokenGoesHere",
-	  "commandList": ["/start","/help","/status","/scr","/usermode","/adminmode"],
+		"botModelClassName": "com.example.TBotModelClass2",
+		"commandList": ["/start","/help","/status","/scr","/usermode","/adminmode"],
 		"threadCount": 4,
-	  "adminIdList": [1111111111111111, 1111111111111111],
+		"adminIdList": [1111111111111111, 1111111111111111],
 		"reportIntervalInSeconds": 86400,
 		"constants": {
 			"key1": "value1",

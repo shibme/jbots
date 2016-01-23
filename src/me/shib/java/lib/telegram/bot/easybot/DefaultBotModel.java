@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -17,15 +18,27 @@ public class DefaultBotModel extends BotModel {
 
     private static final Date startTime = new Date();
 
-    private BotConfig botConfig;
+    private BotConfig config;
+
+    protected BotConfig getConfig() {
+        return config;
+    }
+
     private User myIdentity;
     private BotModel appModel;
     private TelegramBot bot;
 
-    protected DefaultBotModel(BotModel appModel) {
-        this.appModel = appModel;
-        this.botConfig = appModel.getConfig();
-        this.myIdentity = UpdateReceiver.getDefaultInstance(this.botConfig.getBotApiToken()).whoAmI();
+    protected DefaultBotModel(BotConfig config) {
+        super(config);
+        this.config = config;
+        try {
+            Class<?> clazz = Class.forName(config.getBotModelClassName());
+            Constructor<?> ctor = clazz.getConstructor(BotConfig.class);
+            appModel = (BotModel) ctor.newInstance(config);
+        } catch (Exception e) {
+            appModel = null;
+        }
+        this.myIdentity = UpdateReceiver.getDefaultInstance(config.getBotApiToken()).whoAmI();
         bot = getBot();
     }
 
@@ -55,18 +68,16 @@ public class DefaultBotModel extends BotModel {
         }
     }
 
-    @Override
-    public BotConfig getConfig() {
-        return appModel.getConfig();
-    }
-
     public Message onReceivingMessage(Message message) {
-        Message appModelResponseMessage = appModel.onReceivingMessage(message);
+        Message appModelResponseMessage = null;
+        if (appModel != null) {
+            appModelResponseMessage = appModel.onReceivingMessage(message);
+        }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
         }
         try {
-            long[] admins = botConfig.getAdminIdList();
+            long[] admins = config.getAdminIdList();
             if ((admins != null) && (admins.length > 0)) {
                 for (long admin : admins) {
                     try {
@@ -92,7 +103,10 @@ public class DefaultBotModel extends BotModel {
     }
 
     public Message onMessageFromAdmin(Message message) {
-        Message appModelResponseMessage = appModel.onMessageFromAdmin(message);
+        Message appModelResponseMessage = null;
+        if (appModel != null) {
+            appModelResponseMessage = appModel.onMessageFromAdmin(message);
+        }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
         }
@@ -155,13 +169,16 @@ public class DefaultBotModel extends BotModel {
     }
 
     public Message onCommand(Message message) {
-        Message appModelResponseMessage = appModel.onCommand(message);
+        Message appModelResponseMessage = null;
+        if (appModel != null) {
+            appModelResponseMessage = appModel.onCommand(message);
+        }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
         }
         switch (message.getText()) {
             case "/start":
-                if (botConfig.isValidCommand("/start")) {
+                if (config.isValidCommand("/start")) {
                     try {
                         return onStartAndHelp(message);
                     } catch (IOException e) {
@@ -170,7 +187,7 @@ public class DefaultBotModel extends BotModel {
                 }
                 break;
             case "/help":
-                if (botConfig.isValidCommand("/help")) {
+                if (config.isValidCommand("/help")) {
                     try {
                         return onStartAndHelp(message);
                     } catch (IOException e) {
@@ -179,7 +196,7 @@ public class DefaultBotModel extends BotModel {
                 }
                 break;
             case "/scr":
-                if (botConfig.isValidCommand("/scr") && botConfig.isAdmin(message.getChat().getId())) {
+                if (config.isValidCommand("/scr") && config.isAdmin(message.getChat().getId())) {
                     try {
                         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
                         File screenShotFile = getCurrentScreenShotFile();
@@ -197,7 +214,7 @@ public class DefaultBotModel extends BotModel {
                 }
                 break;
             case "/status":
-                if (botConfig.isValidCommand("/status") && botConfig.isAdmin(message.getChat().getId())) {
+                if (config.isValidCommand("/status") && config.isAdmin(message.getChat().getId())) {
                     try {
                         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
                         return sendStatusMessage(message.getChat().getId());
@@ -207,8 +224,8 @@ public class DefaultBotModel extends BotModel {
                 }
                 break;
             case "/usermode":
-                if (botConfig.isValidCommand("/usermode") && botConfig.isAdmin(message.getChat().getId())) {
-                    botConfig.setUserMode(message.getFrom().getId());
+                if (config.isValidCommand("/usermode") && config.isAdmin(message.getChat().getId())) {
+                    config.setUserMode(message.getFrom().getId());
                     try {
                         return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
                     } catch (IOException e) {
@@ -217,8 +234,8 @@ public class DefaultBotModel extends BotModel {
                 }
                 break;
             case "/adminmode":
-                if (botConfig.isValidCommand("/adminmode") && botConfig.isAdmin(message.getChat().getId())) {
-                    botConfig.setAdminMode(message.getFrom().getId());
+                if (config.isValidCommand("/adminmode") && config.isAdmin(message.getChat().getId())) {
+                    config.setAdminMode(message.getFrom().getId());
                     try {
                         return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
                     } catch (IOException e) {
@@ -232,17 +249,28 @@ public class DefaultBotModel extends BotModel {
 
     @Override
     public boolean onInlineQuery(InlineQuery query) {
-        return appModel.onInlineQuery(query);
+        boolean appModelResponse = false;
+        if (appModel != null) {
+            appModelResponse = appModel.onInlineQuery(query);
+        }
+        return appModelResponse;
     }
 
     @Override
     public boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
-        return appModel.onChosenInlineResult(chosenInlineResult);
+        boolean appModelResponse = false;
+        if (appModel != null) {
+            appModelResponse = appModel.onChosenInlineResult(chosenInlineResult);
+        }
+        return appModelResponse;
     }
 
     @Override
     public Message sendStatusMessage(long chatId) {
-        Message appModelResponseMessage = appModel.sendStatusMessage(chatId);
+        Message appModelResponseMessage = null;
+        if (appModel != null) {
+            appModelResponseMessage = appModel.sendStatusMessage(chatId);
+        }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
         }
