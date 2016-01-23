@@ -22,6 +22,7 @@ public class DefaultBotModel extends BotModel {
     private User myIdentity;
     private BotModel appModel;
     private TelegramBot bot;
+
     protected DefaultBotModel(BotConfig config) {
         super(config);
         this.config = config;
@@ -60,6 +61,13 @@ public class DefaultBotModel extends BotModel {
         } catch (UnknownHostException e) {
             return "Unknown Host";
         }
+    }
+
+    protected String getModelClassName() {
+        if (appModel != null) {
+            return appModel.getClass().getSimpleName();
+        }
+        return this.getClass().getSimpleName();
     }
 
     protected BotConfig getConfig() {

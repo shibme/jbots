@@ -6,9 +6,9 @@ import me.shib.java.lib.telegram.bot.types.Update;
 public class TBotWorker extends Thread {
 
     private static int threadCounter = 0;
+
     private BotConfig config;
     private UpdateReceiver updateReceiver;
-    private int threadNumber;
     private DefaultBotModel defaultModel;
     private boolean enabled;
 
@@ -22,20 +22,16 @@ public class TBotWorker extends Thread {
         }
     }
 
-    public synchronized int getThreadNumber() {
-        this.enabled = true;
-        if (this.threadNumber < 1) {
-            TBotWorker.threadCounter++;
-            this.threadNumber = TBotWorker.threadCounter;
-        }
-        return this.threadNumber;
+    public static synchronized int getNewThreadNumber() {
+        threadCounter++;
+        return threadCounter;
     }
 
     public void startBotWork() {
         if (defaultModel != null) {
             TBotSweeper.startDefaultInstance(defaultModel);
             updateReceiver.onBotStart();
-            System.out.println("Starting thread " + getThreadNumber() + " with " + updateReceiver.whoAmI().getUsername());
+            System.out.println("Starting thread " + getNewThreadNumber() + " with " + updateReceiver.whoAmI().getUsername() + " using the model: " + defaultModel.getModelClassName());
             while (enabled) {
                 try {
                     Update update = updateReceiver.getUpdate();
