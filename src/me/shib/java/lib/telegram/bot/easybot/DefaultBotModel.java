@@ -79,10 +79,10 @@ public class DefaultBotModel extends BotModel {
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
                         "Hey " + message.getFrom().getFirst_name()
                                 + ",Your request was taken. I'll get back to you ASAP.",
-                        ParseMode.None, false, message.getMessage_id());
+                        null, false, message.getMessage_id());
             } else {
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
-                        "The support team is unavailable. Please try later.", ParseMode.None, false,
+                        "The support team is unavailable. Please try later.", null, false,
                         message.getMessage_id());
             }
         } catch (IOException e) {
