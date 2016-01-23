@@ -19,15 +19,9 @@ public class DefaultBotModel extends BotModel {
     private static final Date startTime = new Date();
 
     private BotConfig config;
-
-    protected BotConfig getConfig() {
-        return config;
-    }
-
     private User myIdentity;
     private BotModel appModel;
     private TelegramBot bot;
-
     protected DefaultBotModel(BotConfig config) {
         super(config);
         this.config = config;
@@ -68,6 +62,10 @@ public class DefaultBotModel extends BotModel {
         }
     }
 
+    protected BotConfig getConfig() {
+        return config;
+    }
+
     public Message onReceivingMessage(Message message) {
         Message appModelResponseMessage = null;
         if (appModel != null) {
@@ -88,9 +86,8 @@ public class DefaultBotModel extends BotModel {
                     }
                 }
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
-                        "Hey " + message.getFrom().getFirst_name()
-                                + ",Your request was taken. I'll get back to you ASAP.",
-                        null, false, message.getMessage_id());
+                        "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
+                        ParseMode.Markdown, false, message.getMessage_id());
             } else {
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
                         "The support team is unavailable. Please try later.", null, false,

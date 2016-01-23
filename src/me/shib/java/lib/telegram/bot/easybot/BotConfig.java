@@ -31,17 +31,6 @@ public class BotConfig {
         initDefaults();
     }
 
-    private static boolean isValidClassName(String className) {
-        try {
-            if ((className != null) && (!className.isEmpty())) {
-                Class.forName(className);
-                return true;
-            }
-        } catch (ClassNotFoundException ignored) {
-        }
-        return false;
-    }
-
     public static synchronized BotConfig[] getAllConfigList() {
         if (configMap == null) {
             addFileToConfigList(defaultConfigFile);
@@ -67,8 +56,7 @@ public class BotConfig {
             if (configArray != null) {
                 for (BotConfig configItem : configArray) {
                     if ((configItem.getBotApiToken() != null)
-                            && (!configItem.getBotApiToken().isEmpty())
-                            && isValidClassName(configItem.getBotModelClassName())) {
+                            && (!configItem.getBotApiToken().isEmpty())) {
                         configItem.initDefaults();
                         addConfigToList(configItem);
                     }
