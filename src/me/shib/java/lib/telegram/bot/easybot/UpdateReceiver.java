@@ -56,8 +56,7 @@ public class UpdateReceiver {
         if (!botStarted) {
             whoAmI();
             if (myIdentity != null) {
-                System.out.println(
-                        "Starting services for: " + myIdentity.getFirst_name() + " (" + myIdentity.getUsername() + ")");
+                System.out.println("Starting services for: " + myIdentity.getFirst_name() + " (" + myIdentity.getUsername() + ")");
                 botStarted = true;
             }
         }

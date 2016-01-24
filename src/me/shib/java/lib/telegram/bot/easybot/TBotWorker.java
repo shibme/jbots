@@ -11,6 +11,7 @@ public class TBotWorker extends Thread {
     private UpdateReceiver updateReceiver;
     private DefaultBotModel defaultModel;
     private boolean enabled;
+    private int threadNumber;
 
     public TBotWorker(BotConfig config) {
         this.config = config;
@@ -20,18 +21,23 @@ public class TBotWorker extends Thread {
                 defaultModel = new DefaultBotModel(config);
             }
         }
+        enabled = true;
+        threadNumber = 0;
     }
 
-    public static synchronized int getNewThreadNumber() {
-        threadCounter++;
-        return threadCounter;
+    private static synchronized int getThisThreadNumber(TBotWorker worker) {
+        if (worker.threadNumber == 0) {
+            threadCounter++;
+            worker.threadNumber = threadCounter;
+        }
+        return worker.threadNumber;
     }
 
     public void startBotWork() {
         if (defaultModel != null) {
             TBotSweeper.startDefaultInstance(defaultModel);
             updateReceiver.onBotStart();
-            System.out.println("Starting thread " + getNewThreadNumber() + " with " + updateReceiver.whoAmI().getUsername() + " using the model: " + defaultModel.getModelClassName());
+            System.out.println("Starting thread " + getThisThreadNumber(this) + " with " + updateReceiver.whoAmI().getUsername() + " using the model: " + defaultModel.getModelClassName());
             while (enabled) {
                 try {
                     Update update = updateReceiver.getUpdate();
