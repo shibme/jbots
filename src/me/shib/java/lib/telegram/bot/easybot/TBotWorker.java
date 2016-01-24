@@ -1,5 +1,6 @@
 package me.shib.java.lib.telegram.bot.easybot;
 
+import me.shib.java.lib.telegram.bot.service.TelegramBot;
 import me.shib.java.lib.telegram.bot.types.Message;
 import me.shib.java.lib.telegram.bot.types.Update;
 
@@ -8,6 +9,7 @@ public class TBotWorker extends Thread {
     private static int threadCounter = 0;
 
     private BotConfig config;
+    private TelegramBot bot;
     private UpdateReceiver updateReceiver;
     private DefaultBotModel defaultModel;
     private boolean enabled;
@@ -17,11 +19,12 @@ public class TBotWorker extends Thread {
         this.config = config;
         if (config != null) {
             if ((config.getBotApiToken() != null) && (!config.getBotApiToken().isEmpty())) {
+                this.bot = TelegramBot.getInstance(config.getBotApiToken());
                 updateReceiver = UpdateReceiver.getDefaultInstance(this.config.getBotApiToken());
                 defaultModel = new DefaultBotModel(config);
+                enabled = true;
             }
         }
-        enabled = true;
         threadNumber = 0;
     }
 
@@ -37,7 +40,7 @@ public class TBotWorker extends Thread {
         if (defaultModel != null) {
             TBotSweeper.startDefaultInstance(defaultModel);
             updateReceiver.onBotStart();
-            System.out.println("Starting thread " + getThisThreadNumber(this) + " with " + updateReceiver.whoAmI().getUsername() + " using the model: " + defaultModel.getModelClassName());
+            System.out.println("Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + defaultModel.getModelClassName());
             while (enabled) {
                 try {
                     Update update = updateReceiver.getUpdate();
@@ -67,7 +70,7 @@ public class TBotWorker extends Thread {
         }
     }
 
-    public void stopBotThread() {
+    public void stopWorker() {
         enabled = false;
     }
 

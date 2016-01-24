@@ -2,7 +2,6 @@ package me.shib.java.lib.telegram.bot.easybot;
 
 import me.shib.java.lib.telegram.bot.service.TelegramBot;
 import me.shib.java.lib.telegram.bot.types.Update;
-import me.shib.java.lib.telegram.bot.types.User;
 
 import java.io.IOException;
 import java.util.*;
@@ -13,7 +12,6 @@ public class UpdateReceiver {
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
-    private User myIdentity;
     private boolean botStarted;
 
     private UpdateReceiver(String botAPItoken) {
@@ -54,23 +52,9 @@ public class UpdateReceiver {
 
     protected synchronized void onBotStart() {
         if (!botStarted) {
-            whoAmI();
-            if (myIdentity != null) {
-                System.out.println("Starting services for: " + myIdentity.getFirst_name() + " (" + myIdentity.getUsername() + ")");
-                botStarted = true;
-            }
+            System.out.println("Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
+            botStarted = true;
         }
-    }
-
-    public User whoAmI() {
-        if (myIdentity == null) {
-            try {
-                myIdentity = bot.getMe();
-            } catch (IOException e) {
-                myIdentity = null;
-            }
-        }
-        return myIdentity;
     }
 
 }

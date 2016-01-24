@@ -19,7 +19,6 @@ public class DefaultBotModel extends BotModel {
     private static final Date startTime = new Date();
 
     private BotConfig config;
-    private User myIdentity;
     private BotModel appModel;
     private TelegramBot bot;
 
@@ -33,7 +32,6 @@ public class DefaultBotModel extends BotModel {
         } catch (Exception e) {
             appModel = null;
         }
-        this.myIdentity = UpdateReceiver.getDefaultInstance(config.getBotApiToken()).whoAmI();
         bot = getBot();
     }
 
@@ -168,8 +166,8 @@ public class DefaultBotModel extends BotModel {
     private Message onStartAndHelp(Message message) throws IOException {
         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
         return bot.sendMessage(new ChatId(message.getChat().getId()),
-                "Hi " + message.getFrom().getFirst_name() + ". My name is *" + myIdentity.getFirst_name() + "* (@"
-                        + myIdentity.getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
+                "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
+                        + bot.getIdentity().getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
                 ParseMode.Markdown);
     }
 
