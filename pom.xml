@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.shib.java.lib</groupId>
-    <artifactId>easy-tbot</artifactId>
-    <version>0.9.12</version>
+    <artifactId>jbots</artifactId>
+    <version>0.3</version>
     <name>Easy TBot Framework</name>
     <description>A framework for creating Telegram Bots with the hard parts done already</description>
-    <url>https://github.com/shibme/easy-tbot</url>
+    <url>https://github.com/shibme/jbots</url>
 
     <issueManagement>
-        <url>https://github.com/shibme/easy-tbot/issues</url>
+        <url>https://github.com/shibme/jbots/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
@@ -24,9 +24,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/shibme/easy-tbot</url>
-        <connection>scm:git:https://github.com/shibme/easy-tbot.git</connection>
-        <developerConnection>scm:git:shibme@github.com:shibme/easy-tbot.git</developerConnection>
+        <url>https://github.com/shibme/jbots</url>
+        <connection>scm:git:https://github.com/shibme/jbots.git</connection>
+        <developerConnection>scm:git:shibme@github.com:shibme/jbots.git</developerConnection>
     </scm>
 
     <developers>
@@ -145,8 +145,8 @@
     <dependencies>
         <dependency>
             <groupId>me.shib.java.lib</groupId>
-            <artifactId>telegram-bot-java</artifactId>
-            <version>1.3.7</version>
+            <artifactId>jtelebot</artifactId>
+            <version>0.8</version>
         </dependency>
     </dependencies>
 

@@ -10,7 +10,7 @@ import java.util.*;
 
 public class BotConfig {
 
-    private static final File defaultConfigFile = new File("easy-tbot-config.json");
+    private static final File defaultConfigFile = new File("jbots-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
     private static Map<String, BotConfig> configMap;
