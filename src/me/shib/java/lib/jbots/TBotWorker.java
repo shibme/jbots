@@ -1,8 +1,9 @@
-package me.shib.java.lib.telegram.bot.easybot;
+package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBot;
-import me.shib.java.lib.telegram.bot.types.Message;
-import me.shib.java.lib.telegram.bot.types.Update;
+
+import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.Message;
+import me.shib.java.lib.jtelebot.types.Update;
 
 public class TBotWorker extends Thread {
 

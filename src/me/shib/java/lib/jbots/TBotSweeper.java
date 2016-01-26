@@ -1,6 +1,7 @@
-package me.shib.java.lib.telegram.bot.easybot;
+package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBot;
+
+import me.shib.java.lib.jtelebot.service.TelegramBot;
 
 import java.util.HashMap;
 import java.util.Map;

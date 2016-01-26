@@ -11,6 +11,6 @@ Add to your pom.xml:
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.3</version>
+	<version>0.3.1</version>
 </dependency>
 ```

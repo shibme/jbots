@@ -1,4 +1,4 @@
-package me.shib.java.lib.telegram.bot.easybot;
+package me.shib.java.lib.jbots;
 
 import me.shib.java.lib.common.utils.JsonLib;
 

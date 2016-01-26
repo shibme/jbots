@@ -1,8 +1,8 @@
-package me.shib.java.lib.telegram.bot.easybot;
+package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.telegram.bot.service.TelegramBot;
-import me.shib.java.lib.telegram.bot.service.TelegramBot.ChatAction;
-import me.shib.java.lib.telegram.bot.types.*;
+
+import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -164,7 +164,7 @@ public class DefaultBotModel extends BotModel {
     }
 
     private Message onStartAndHelp(Message message) throws IOException {
-        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.typing);
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
                         + bot.getIdentity().getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
@@ -201,7 +201,7 @@ public class DefaultBotModel extends BotModel {
             case "/scr":
                 if (config.isValidCommand("/scr") && config.isAdmin(message.getChat().getId())) {
                     try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.upload_document);
                         File screenShotFile = getCurrentScreenShotFile();
                         if (screenShotFile != null) {
                             Message returnMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
@@ -219,7 +219,7 @@ public class DefaultBotModel extends BotModel {
             case "/status":
                 if (config.isValidCommand("/status") && config.isAdmin(message.getChat().getId())) {
                     try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.typing);
                         return sendStatusMessage(message.getChat().getId());
                     } catch (IOException e) {
                         e.printStackTrace();
