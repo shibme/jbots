@@ -107,11 +107,11 @@ Create a file named `jbots-config.json` and add the following
 	}
 ]
 ```
-`botApiToken` - The API token that you receive when you create a bot with [@BotFather](https://telegram.me/BotFather).
-`botModelClassName` - The fully qualified class name of the bot's Model extended from JBotModel.
-`commandList` - The list of supported commands you may have.
-`threadCount` - The number of threads the bot should have.
-`adminIdList` - Use [@GO_Robot](https://telegram.me/GO_Robot) to find your telegram ID and add it to admin list.
-`reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running). 
-`analyticsEnabled` - If set to true will enable analytics. Must have the right analytics/proxy dependency included.
-`botanProxyToken` - If you're using botan analytics, all you need to do is mention the token, if not the framework will use `jbotstats` analytics when enabled.
+* `botApiToken` - The API token that you receive when you create a bot with [@BotFather](https://telegram.me/BotFather).
+* `botModelClassName` - The fully qualified class name of the bot's Model extended from JBotModel.
+* `commandList` - The list of supported commands you may have.
+* `threadCount` - The number of threads the bot should have.
+* `adminIdList` - Use [@GO_Robot](https://telegram.me/GO_Robot) to find your telegram ID and add it to admin list.
+* `reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running). 
+* `analyticsEnabled` - If set to true will enable analytics. Must have the right analytics/proxy dependency included.
+* `botanProxyToken` - If you're using botan analytics, all you need to do is mention the token, if not the framework will use `jbotstats` analytics when enabled.
