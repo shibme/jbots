@@ -82,19 +82,27 @@ Create a file named `jbots-config.json` and add the following
 ```json
 [
 	{
-		"botApiToken": "YourBotApiTokenGoesHere",
-		"botModelClassName": "com.example.YourModelClassName",
+		"botApiToken": "YourBotApiToken1",
+		"botModelClassName": "com.example.YourModelClassName1",
 		"commandList": ["/start","/help","/status","/scr"],
 		"threadCount": 4,
 		"adminIdList": [1111111111111, 2222222222222],
 		"reportIntervalInSeconds": 604800,
-		"analyticsEnabled":true,
-		"botanProxyToken": "BotanTokenGoesHere",
+		"analyticsEnabled": true,
+		"botanProxyToken": "BotanToken1",
 		"constants": {
-			"homeDirPath": "D:\\Music",
-			"maxEntriesPerView": "20",
-			"sendDir": "false",
-			"fileExtensionsToShow": "mp3,wav"
+			"channelName": "@ExampleChannel2"
+		}
+	},
+	{
+		"botApiToken": "YourBotApiToken2",
+		"botModelClassName": "com.example.YourModelClassName2",
+		"commandList": ["/start","/help","/status","/scr"],
+		"threadCount": 2,
+		"adminIdList": [1111111111111, 2222222222222],
+		"reportIntervalInSeconds": 86400,
+		"constants": {
+			"channelName": "@ExampleChannel1"
 		}
 	}
 ]
