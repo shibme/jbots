@@ -14,21 +14,21 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-public class DefaultBotModel extends BotModel {
+public class JBotDefaultModel extends JBotModel {
 
     private static final Date startTime = new Date();
 
-    private BotConfig config;
-    private BotModel appModel;
+    private JBotConfig config;
+    private JBotModel appModel;
     private TelegramBot bot;
 
-    protected DefaultBotModel(BotConfig config) {
+    protected JBotDefaultModel(JBotConfig config) {
         super(config);
         this.config = config;
         try {
             Class<?> clazz = Class.forName(config.getBotModelClassName());
-            Constructor<?> ctor = clazz.getConstructor(BotConfig.class);
-            appModel = (BotModel) ctor.newInstance(config);
+            Constructor<?> ctor = clazz.getConstructor(JBotConfig.class);
+            appModel = (JBotModel) ctor.newInstance(config);
         } catch (Exception e) {
             appModel = null;
         }
@@ -68,7 +68,7 @@ public class DefaultBotModel extends BotModel {
         return this.getClass().getSimpleName();
     }
 
-    protected BotConfig getConfig() {
+    protected JBotConfig getConfig() {
         return config;
     }
 
@@ -80,29 +80,7 @@ public class DefaultBotModel extends BotModel {
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
         }
-        try {
-            long[] admins = config.getAdminIdList();
-            if ((admins != null) && (admins.length > 0)) {
-                for (long admin : admins) {
-                    try {
-                        bot.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
-                                message.getMessage_id());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                return bot.sendMessage(new ChatId(message.getChat().getId()),
-                        "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
-                        ParseMode.Markdown, false, message.getMessage_id());
-            } else {
-                return bot.sendMessage(new ChatId(message.getChat().getId()),
-                        "The support team is unavailable. Please try later.", null, false,
-                        message.getMessage_id());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return forwardToAdmins(message);
     }
 
     public Message onMessageFromAdmin(Message message) {

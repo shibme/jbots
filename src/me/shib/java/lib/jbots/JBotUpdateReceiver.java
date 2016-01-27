@@ -7,30 +7,31 @@ import me.shib.java.lib.jtelebot.types.Update;
 import java.io.IOException;
 import java.util.*;
 
-public class UpdateReceiver {
+public class JBotUpdateReceiver {
 
-    private static Map<String, UpdateReceiver> updateReceiverMap;
+    private static Map<String, JBotUpdateReceiver> updateReceiverMap;
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
     private boolean botStarted;
 
-    private UpdateReceiver(String botAPItoken) {
+    private JBotUpdateReceiver(JBotConfig config) {
         this.updatesQueue = new LinkedList<>();
-        this.bot = TelegramBot.getInstance(botAPItoken);
+        this.bot = JBots.getInstance(config);
         botStarted = false;
     }
 
-    protected static synchronized UpdateReceiver getDefaultInstance(String botAPItoken) {
+    protected static synchronized JBotUpdateReceiver getDefaultInstance(JBotConfig config) {
         if (updateReceiverMap == null) {
             updateReceiverMap = new HashMap<>();
         }
-        UpdateReceiver updateReceiver = updateReceiverMap.get(botAPItoken);
-        if (updateReceiver == null) {
-            updateReceiver = new UpdateReceiver(botAPItoken);
-            updateReceiverMap.put(botAPItoken, updateReceiver);
+        String botAPItoken = config.getBotApiToken();
+        JBotUpdateReceiver JBotUpdateReceiver = updateReceiverMap.get(botAPItoken);
+        if (JBotUpdateReceiver == null) {
+            JBotUpdateReceiver = new JBotUpdateReceiver(config);
+            updateReceiverMap.put(botAPItoken, JBotUpdateReceiver);
         }
-        return updateReceiver;
+        return JBotUpdateReceiver;
     }
 
     private synchronized void fillUpdatesQueue() {

@@ -8,15 +8,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class BotConfig {
+public class JBotConfig {
 
     private static final File defaultConfigFile = new File("jbots-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
-    private static Map<String, BotConfig> configMap;
+    private static Map<String, JBotConfig> configMap;
 
     private String botModelClassName;
     private String botApiToken;
+    private String botanProxyToken;
+    private boolean analyticsEnabled;
     private String[] commandList;
     private int threadCount;
     private long[] adminIdList;
@@ -24,7 +26,7 @@ public class BotConfig {
     private Map<String, String> constants;
     private Set<String> userModeSet;
 
-    public BotConfig(String botApiToken, Class<BotModel> botModelClass) {
+    public JBotConfig(String botApiToken, Class<JBotModel> botModelClass) {
         this.botModelClassName = botModelClass.getName();
         this.botApiToken = botApiToken;
         adminIdList = null;
@@ -45,19 +47,19 @@ public class BotConfig {
         return false;
     }
 
-    public static synchronized BotConfig[] getAllConfigList() {
+    public static synchronized JBotConfig[] getAllConfigList() {
         if (configMap == null) {
             addFileToConfigList(defaultConfigFile);
         }
         if (configMap == null) {
             return null;
         }
-        ArrayList<BotConfig> configList = new ArrayList<>(configMap.values());
-        BotConfig[] configArray = new BotConfig[configList.size()];
+        ArrayList<JBotConfig> configList = new ArrayList<>(configMap.values());
+        JBotConfig[] configArray = new JBotConfig[configList.size()];
         return configList.toArray(configArray);
     }
 
-    public static void addConfigToList(BotConfig config) {
+    public static void addConfigToList(JBotConfig config) {
         if (configMap == null) {
             configMap = new HashMap<>();
         }
@@ -66,9 +68,9 @@ public class BotConfig {
 
     public static synchronized void addJSONtoConfigList(String json) {
         if (json != null) {
-            BotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(json, BotConfig[].class);
+            JBotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(json, JBotConfig[].class);
             if (configArray != null) {
-                for (BotConfig configItem : configArray) {
+                for (JBotConfig configItem : configArray) {
                     if ((configItem.getBotApiToken() != null)
                             && (!configItem.getBotApiToken().isEmpty())
                             && isValidClassName(configItem.getBotModelClassName())) {
@@ -99,6 +101,14 @@ public class BotConfig {
                 e.printStackTrace();
             }
         }
+    }
+
+    protected String getBotanProxyToken() {
+        return botanProxyToken;
+    }
+
+    protected boolean isAnalyticsEnabled() {
+        return analyticsEnabled;
     }
 
     private boolean doesStringExistInList(String str, ArrayList<String> list) {
@@ -140,6 +150,8 @@ public class BotConfig {
         if (this.threadCount < 1) {
             this.threadCount = 1;
         }
+        this.analyticsEnabled = false;
+        this.botanProxyToken = null;
     }
 
     public String getConstant(String key) {

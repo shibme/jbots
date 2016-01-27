@@ -5,31 +5,31 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.Message;
 import me.shib.java.lib.jtelebot.types.Update;
 
-public class TBotWorker extends Thread {
+public class JBotWorker extends Thread {
 
     private static int threadCounter = 0;
 
-    private BotConfig config;
+    private JBotConfig config;
     private TelegramBot bot;
-    private UpdateReceiver updateReceiver;
-    private DefaultBotModel defaultModel;
+    private JBotUpdateReceiver jBotUpdateReceiver;
+    private JBotDefaultModel defaultModel;
     private boolean enabled;
     private int threadNumber;
 
-    public TBotWorker(BotConfig config) {
+    public JBotWorker(JBotConfig config) {
         this.config = config;
         if (config != null) {
             if ((config.getBotApiToken() != null) && (!config.getBotApiToken().isEmpty())) {
-                this.bot = TelegramBot.getInstance(config.getBotApiToken());
-                updateReceiver = UpdateReceiver.getDefaultInstance(this.config.getBotApiToken());
-                defaultModel = new DefaultBotModel(config);
+                this.bot = JBots.getInstance(config);
+                jBotUpdateReceiver = JBotUpdateReceiver.getDefaultInstance(this.config);
+                defaultModel = new JBotDefaultModel(config);
                 enabled = true;
             }
         }
         threadNumber = 0;
     }
 
-    private static synchronized int getThisThreadNumber(TBotWorker worker) {
+    private static synchronized int getThisThreadNumber(JBotWorker worker) {
         if (worker.threadNumber == 0) {
             threadCounter++;
             worker.threadNumber = threadCounter;
@@ -39,12 +39,12 @@ public class TBotWorker extends Thread {
 
     public void startBotWork() {
         if (defaultModel != null) {
-            TBotSweeper.startDefaultInstance(defaultModel);
-            updateReceiver.onBotStart();
+            JBotSweeper.startDefaultInstance(defaultModel);
+            jBotUpdateReceiver.onBotStart();
             System.out.println("Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + defaultModel.getModelClassName());
             while (enabled) {
                 try {
-                    Update update = updateReceiver.getUpdate();
+                    Update update = jBotUpdateReceiver.getUpdate();
                     if (update.getMessage() != null) {
                         Message message = update.getMessage();
                         boolean adminIdValid = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId()));

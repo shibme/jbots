@@ -5,15 +5,15 @@ import me.shib.java.lib.rest.client.ServiceResponse;
 
 import java.io.IOException;
 
-public class BotLauncher {
+public class JBotLauncher {
 
-    public static void launchBots(BotConfig[] configList) {
+    public static void launchBots(JBotConfig[] configList) {
         if (configList != null) {
-            for (BotConfig conf : configList) {
+            for (JBotConfig conf : configList) {
                 int threadCount = conf.getThreadCount();
-                TBotWorker[] workers = new TBotWorker[threadCount];
+                JBotWorker[] workers = new JBotWorker[threadCount];
                 for (int i = 0; i < threadCount; i++) {
-                    workers[i] = new TBotWorker(conf);
+                    workers[i] = new JBotWorker(conf);
                     workers[i].start();
                 }
             }
@@ -32,9 +32,9 @@ public class BotLauncher {
                     }
                 } catch (IOException ignored) {
                 }
-                BotConfig.addJSONtoConfigList(configJson);
+                JBotConfig.addJSONtoConfigList(configJson);
             }
-            BotConfig[] configList = BotConfig.getAllConfigList();
+            JBotConfig[] configList = JBotConfig.getAllConfigList();
             launchBots(configList);
         } else {
             System.out.println("Please provide valid arguments.");

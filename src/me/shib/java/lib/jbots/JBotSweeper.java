@@ -1,26 +1,22 @@
 package me.shib.java.lib.jbots;
 
 
-import me.shib.java.lib.jtelebot.service.TelegramBot;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class TBotSweeper extends Thread {
+public class JBotSweeper extends Thread {
 
-    private static Map<String, TBotSweeper> tBotSweeperMap;
+    private static Map<String, JBotSweeper> tBotSweeperMap;
 
-    private DefaultBotModel defaultModel;
-    private BotConfig botConfig;
-    private TelegramBot sweeperTelegramBot;
+    private JBotDefaultModel defaultModel;
+    private JBotConfig jBotConfig;
 
-    private TBotSweeper(DefaultBotModel defaultModel) {
-        this.botConfig = defaultModel.getConfig();
+    private JBotSweeper(JBotDefaultModel defaultModel) {
+        this.jBotConfig = defaultModel.getConfig();
         this.defaultModel = defaultModel;
-        this.sweeperTelegramBot = TelegramBot.getInstance(this.botConfig.getBotApiToken());
     }
 
-    private static synchronized TBotSweeper getDefaultInstance(DefaultBotModel defaultModel) {
+    private static synchronized JBotSweeper getDefaultInstance(JBotDefaultModel defaultModel) {
         String botApiToken = defaultModel.getConfig().getBotApiToken();
         if (botApiToken == null) {
             return null;
@@ -28,24 +24,24 @@ public class TBotSweeper extends Thread {
         if (tBotSweeperMap == null) {
             tBotSweeperMap = new HashMap<>();
         }
-        TBotSweeper tBotSwp = tBotSweeperMap.get(botApiToken);
+        JBotSweeper tBotSwp = tBotSweeperMap.get(botApiToken);
         if (tBotSwp == null) {
-            tBotSwp = new TBotSweeper(defaultModel);
+            tBotSwp = new JBotSweeper(defaultModel);
             tBotSweeperMap.put(botApiToken, tBotSwp);
         }
         return tBotSwp;
     }
 
-    protected static synchronized void startDefaultInstance(DefaultBotModel defaultModel) {
-        TBotSweeper defaultSweeper = TBotSweeper.getDefaultInstance(defaultModel);
+    protected static synchronized void startDefaultInstance(JBotDefaultModel defaultModel) {
+        JBotSweeper defaultSweeper = JBotSweeper.getDefaultInstance(defaultModel);
         if ((!defaultSweeper.isAlive()) && (defaultSweeper.getState() != State.TERMINATED)) {
             defaultSweeper.start();
         }
     }
 
     private void sendStatusUpdatesOnIntervals() {
-        long intervals = this.botConfig.getReportIntervalInSeconds() * 1000;
-        long[] adminIdList = this.botConfig.getAdminIdList();
+        long intervals = this.jBotConfig.getReportIntervalInSeconds() * 1000;
+        long[] adminIdList = this.jBotConfig.getAdminIdList();
         if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
             while (true) {
                 try {
@@ -53,7 +49,7 @@ public class TBotSweeper extends Thread {
                         this.defaultModel.sendStatusMessage(admin);
                     }
                     Thread.sleep(intervals);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }
