@@ -44,12 +44,14 @@ public class JBots {
                         Constructor<?> ctor = clazz.getConstructor(String.class, String.class);
                         bot = (TelegramBot) ctor.newInstance(botApiToken, botanProxyToken);
                     }
-                } catch (Exception e) {
-                    bot = TelegramBot.getInstance(botApiToken);
+                } catch (Exception ignored) {
                 }
-                if (bot != null) {
-                    jBotsMap.put(botApiToken, bot);
-                }
+            }
+            if (bot == null) {
+                bot = TelegramBot.getInstance(botApiToken);
+            }
+            if (bot != null) {
+                jBotsMap.put(botApiToken, bot);
             }
         }
         return bot;
