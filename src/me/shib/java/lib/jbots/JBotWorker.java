@@ -20,9 +20,9 @@ public class JBotWorker extends Thread {
         this.config = config;
         if (config != null) {
             if ((config.getBotApiToken() != null) && (!config.getBotApiToken().isEmpty())) {
-                this.bot = JBots.getInstance(config);
                 jBotUpdateReceiver = JBotUpdateReceiver.getDefaultInstance(this.config);
                 defaultModel = new JBotDefaultModel(config);
+                bot = defaultModel.getBot();
                 enabled = true;
             }
         }

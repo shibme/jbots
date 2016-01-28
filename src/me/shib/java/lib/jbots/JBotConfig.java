@@ -1,6 +1,7 @@
 package me.shib.java.lib.jbots;
 
 import me.shib.java.lib.common.utils.JsonLib;
+import me.shib.java.lib.jtelebot.service.TelegramBot;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -75,7 +76,12 @@ public class JBotConfig {
                             && (!configItem.getBotApiToken().isEmpty())
                             && isValidClassName(configItem.getBotModelClassName())) {
                         configItem.initDefaults();
-                        addConfigToList(configItem);
+                        TelegramBot bot = JBots.getInstance(configItem);
+                        if (bot != null) {
+                            addConfigToList(configItem);
+                        } else {
+                            System.out.println("The bot with API token, \"" + configItem.getBotApiToken() + "\" doesn't seem to work.");
+                        }
                     }
                 }
             }
