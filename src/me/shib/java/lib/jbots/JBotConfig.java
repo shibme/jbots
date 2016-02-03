@@ -14,6 +14,7 @@ public class JBotConfig {
     private static final File defaultConfigFile = new File("jbots-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
+    private static JsonLib jsonLib = new JsonLib();
     private static Map<String, JBotConfig> configMap;
 
     private String botModelClassName;
@@ -69,7 +70,7 @@ public class JBotConfig {
 
     public static synchronized void addJSONtoConfigList(String json) {
         if (json != null) {
-            JBotConfig[] configArray = JsonLib.getDefaultInstance().fromJson(json, JBotConfig[].class);
+            JBotConfig[] configArray = jsonLib.fromJson(json, JBotConfig[].class);
             if (configArray != null) {
                 for (JBotConfig configItem : configArray) {
                     if ((configItem.getBotApiToken() != null)

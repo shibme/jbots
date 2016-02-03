@@ -1,8 +1,9 @@
 # JBots
-A java framework for creating Telegram Bots with less efforts.
-
-### Build Status
 [![Build Status](https://travis-ci.org/shibme/jbots.svg)](https://travis-ci.org/shibme/jbots)
+[![Dependency Status](https://www.versioneye.com/user/projects/56adffd47e03c700377e0046/badge.svg?style=flat)](https://www.versioneye.com/user/projects/56adffd47e03c700377e0046)
+[![Download](https://api.bintray.com/packages/shibme/maven/jbots/images/download.svg)](https://bintray.com/shibme/maven/jbots/_latestVersion)
+
+A java framework for creating Telegram Bots with less efforts
 
 ### Maven Dependency for Consumers
 Add to your `pom.xml`
@@ -10,7 +11,7 @@ Add to your `pom.xml`
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.4.2</version>
+	<version>0.5/version>
 </dependency>
 ```
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
