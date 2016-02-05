@@ -4,8 +4,11 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.*;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public abstract class JBotModel {
+
+    private static Logger logger = Logger.getLogger(JBotModel.class.getName());
 
     private TelegramBot bot;
     private JBotConfig config;
@@ -28,7 +31,7 @@ public abstract class JBotModel {
                         bot.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
                                 message.getMessage_id());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(JBotLauncher.class.getName(), "forwardToAdmins", e);
                     }
                 }
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
@@ -38,6 +41,7 @@ public abstract class JBotModel {
             return bot.sendMessage(new ChatId(message.getChat().getId()),
                     "The support team is unavailable. Please try later.", null, false, message.getMessage_id());
         } catch (IOException e) {
+            logger.throwing(JBotLauncher.class.getName(), "forwardToAdmins", e);
             return null;
         }
     }

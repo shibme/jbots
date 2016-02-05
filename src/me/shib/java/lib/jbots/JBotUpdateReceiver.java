@@ -6,10 +6,13 @@ import me.shib.java.lib.jtelebot.types.Update;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JBotUpdateReceiver {
 
     private static Map<String, JBotUpdateReceiver> updateReceiverMap;
+    private static Logger logger = Logger.getLogger(JBotUpdateReceiver.class.getName());
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
@@ -39,7 +42,7 @@ public class JBotUpdateReceiver {
             Update[] updates = bot.getUpdates();
             Collections.addAll(updatesQueue, updates);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.throwing(this.getClass().getName(), "fillUpdatesQueue", e);
         }
     }
 
@@ -54,7 +57,7 @@ public class JBotUpdateReceiver {
 
     protected synchronized void onBotStart() {
         if (!botStarted) {
-            System.out.println("Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
+            logger.log(Level.INFO, "Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
             botStarted = true;
         }
     }

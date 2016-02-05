@@ -3,10 +3,12 @@ package me.shib.java.lib.jbots;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class JBotSweeper extends Thread {
 
     private static Map<String, JBotSweeper> tBotSweeperMap;
+    private static Logger logger = Logger.getLogger(JBotSweeper.class.getName());
 
     private JBotDefaultModel defaultModel;
     private JBotConfig jBotConfig;
@@ -49,7 +51,8 @@ public class JBotSweeper extends Thread {
                         this.defaultModel.sendStatusMessage(admin);
                     }
                     Thread.sleep(intervals);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    logger.throwing(this.getClass().getName(), "sendStatusUpdatesOnIntervals", e);
                 }
             }
         }

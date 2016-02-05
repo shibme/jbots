@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JBotConfig {
 
     private static final File defaultConfigFile = new File("jbots-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
+    private static Logger logger = Logger.getLogger(JBotConfig.class.getName());
     private static JsonLib jsonLib = new JsonLib();
     private static Map<String, JBotConfig> configMap;
 
@@ -44,7 +47,8 @@ public class JBotConfig {
                 Class.forName(className);
                 return true;
             }
-        } catch (ClassNotFoundException ignored) {
+        } catch (ClassNotFoundException e) {
+            logger.throwing(JBotConfig.class.getName(), "isValidClassName", e);
         }
         return false;
     }
@@ -81,7 +85,7 @@ public class JBotConfig {
                         if (bot != null) {
                             addConfigToList(configItem);
                         } else {
-                            System.out.println("The bot with API token, \"" + configItem.getBotApiToken() + "\" doesn't seem to work.");
+                            logger.log(Level.WARNING, "The bot with API token, \"" + configItem.getBotApiToken() + "\" doesn't seem to work.");
                         }
                     }
                 }
@@ -105,6 +109,7 @@ public class JBotConfig {
                 br.close();
                 addJSONtoConfigList(jsonBuilder.toString());
             } catch (IOException e) {
+                logger.throwing(JBotConfig.class.getName(), "addFileToConfigList", e);
                 e.printStackTrace();
             }
         }

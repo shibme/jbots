@@ -5,19 +5,23 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JBots {
 
     private static final String botanProxyClass = "me.shib.java.lib.jbotan.JBotan";
     private static final String jBotAnalyticsClass = "me.shib.java.lib.jbotstats.JBotStats";
 
-    public static Map<String, TelegramBot> jBotsMap;
+    private static Logger logger = Logger.getLogger(JBots.class.getName());
+    private static Map<String, TelegramBot> jBotsMap;
 
     private static synchronized boolean isProxyModelInClassPath(String className) {
         try {
             Class.forName(className);
             return true;
         } catch (ClassNotFoundException e) {
+            logger.log(Level.FINER, e.getLocalizedMessage());
             return false;
         }
     }
@@ -44,7 +48,8 @@ public class JBots {
                         Constructor<?> ctor = clazz.getConstructor(String.class, String.class);
                         bot = (TelegramBot) ctor.newInstance(botApiToken, botanProxyToken);
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    logger.throwing(JBots.class.getName(), "getInstance", e);
                 }
             }
             if (bot == null) {

@@ -5,9 +5,13 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.Message;
 import me.shib.java.lib.jtelebot.types.Update;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class JBotWorker extends Thread {
 
     private static int threadCounter = 0;
+    private static Logger logger = Logger.getLogger(JBotWorker.class.getName());
 
     private JBotConfig config;
     private TelegramBot bot;
@@ -41,7 +45,7 @@ public class JBotWorker extends Thread {
         if (defaultModel != null) {
             JBotSweeper.startDefaultInstance(defaultModel);
             jBotUpdateReceiver.onBotStart();
-            System.out.println("Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + defaultModel.getModelClassName());
+            logger.log(Level.INFO, "Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + defaultModel.getModelClassName());
             while (enabled) {
                 try {
                     Update update = jBotUpdateReceiver.getUpdate();
@@ -65,7 +69,7 @@ public class JBotWorker extends Thread {
                         defaultModel.onChosenInlineResult(update.getChosen_inline_result());
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.throwing(this.getClass().getName(), "startBotWork", e);
                 }
             }
         }

@@ -13,10 +13,14 @@ import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JBotDefaultModel extends JBotModel {
 
     private static final Date startTime = new Date();
+
+    private static Logger logger = Logger.getLogger(JBotDefaultModel.class.getName());
 
     private JBotConfig config;
     private JBotModel appModel;
@@ -30,6 +34,7 @@ public class JBotDefaultModel extends JBotModel {
             Constructor<?> ctor = clazz.getConstructor(JBotConfig.class);
             appModel = (JBotModel) ctor.newInstance(config);
         } catch (Exception e) {
+            logger.throwing(this.getClass().getName(), "JBotDefaultModel", e);
             appModel = null;
         }
         bot = getBot();
@@ -57,6 +62,7 @@ public class JBotDefaultModel extends JBotModel {
             hostname = ip.getHostName();
             return hostname + "(" + ip.getHostAddress() + ")";
         } catch (UnknownHostException e) {
+            logger.throwing(JBotDefaultModel.class.getName(), "getHostInfo", e);
             return "Unknown Host";
         }
     }
@@ -116,7 +122,8 @@ public class JBotDefaultModel extends JBotModel {
                             new TelegramFile(message.getDocument().getFile_id()));
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger.throwing(this.getClass().getName(), "onMessageFromAdmin", e);
         }
         return null;
     }
@@ -126,7 +133,9 @@ public class JBotDefaultModel extends JBotModel {
             File screenShotFile = new File("screenshots" + File.separator + new Date().getTime() + ".png");
             File parentDir = screenShotFile.getParentFile();
             if ((!parentDir.exists()) || (!parentDir.isDirectory())) {
-                parentDir.mkdirs();
+                if (!parentDir.mkdirs()) {
+                    logger.log(Level.WARNING, "Failed to create directory tree: " + parentDir.getAbsolutePath());
+                }
             }
             if (parentDir.exists() && parentDir.isDirectory()) {
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -137,6 +146,7 @@ public class JBotDefaultModel extends JBotModel {
             }
             return screenShotFile;
         } catch (Exception e) {
+            logger.throwing(this.getClass().getName(), "getCurrentScreenShotFile", e);
             return null;
         }
     }
@@ -163,7 +173,7 @@ public class JBotDefaultModel extends JBotModel {
                     try {
                         return onStartAndHelp(message);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -172,7 +182,7 @@ public class JBotDefaultModel extends JBotModel {
                     try {
                         return onStartAndHelp(message);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -184,13 +194,15 @@ public class JBotDefaultModel extends JBotModel {
                         if (screenShotFile != null) {
                             Message returnMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
                                     new TelegramFile(screenShotFile));
-                            screenShotFile.delete();
+                            if (!screenShotFile.delete()) {
+                                logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
+                            }
                             return returnMessage;
                         }
                         return bot.sendMessage(new ChatId(message.getChat().getId()),
                                 "I couldn't take a screenshot right now. I'm sorry.");
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -200,7 +212,7 @@ public class JBotDefaultModel extends JBotModel {
                         bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.typing);
                         return sendStatusMessage(message.getChat().getId());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -210,7 +222,7 @@ public class JBotDefaultModel extends JBotModel {
                     try {
                         return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -220,7 +232,7 @@ public class JBotDefaultModel extends JBotModel {
                     try {
                         return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
                 }
                 break;
@@ -259,7 +271,7 @@ public class JBotDefaultModel extends JBotModel {
             return bot.sendMessage(new ChatId(chatId),
                     "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.throwing(this.getClass().getName(), "sendStatusMessage", e);
         }
         return null;
     }

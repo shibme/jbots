@@ -4,8 +4,12 @@ import me.shib.java.lib.rest.client.ServiceAdapter;
 import me.shib.java.lib.rest.client.ServiceResponse;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JBotLauncher {
+
+    private static Logger logger = Logger.getLogger(JBotLauncher.class.getName());
 
     public static void launchBots(JBotConfig[] configList) {
         if (configList != null) {
@@ -30,14 +34,15 @@ public class JBotLauncher {
                     if (response.getStatusCode() == 200) {
                         configJson = response.getResponse();
                     }
-                } catch (IOException ignored) {
+                } catch (IOException e) {
+                    logger.throwing(JBotLauncher.class.getName(), "sendStatusMessage", e);
                 }
                 JBotConfig.addJSONtoConfigList(configJson);
             }
             JBotConfig[] configList = JBotConfig.getAllConfigList();
             launchBots(configList);
         } else {
-            System.out.println("Please provide valid arguments.");
+            logger.log(Level.SEVERE, "Please provide valid arguments");
         }
     }
 }
