@@ -1,6 +1,7 @@
 package me.shib.java.lib.jbots;
 
 import me.shib.java.lib.common.utils.JsonLib;
+import me.shib.java.lib.jbotstats.BotStatsConfig;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
 
 import java.io.BufferedReader;
@@ -22,16 +23,15 @@ public class JBotConfig {
 
     private String botModelClassName;
     private String botApiToken;
-    private String botanProxyToken;
-    private boolean analyticsEnabled;
     private String[] commandList;
     private int threadCount;
     private long[] adminIdList;
     private long reportIntervalInSeconds;
+    private BotStatsConfig botStatsConfig;
     private Map<String, String> constants;
     private Set<String> userModeSet;
 
-    public JBotConfig(String botApiToken, Class<JBotModel> botModelClass) {
+    public JBotConfig(String botApiToken, Class<JBot> botModelClass) {
         this.botModelClassName = botModelClass.getName();
         this.botApiToken = botApiToken;
         adminIdList = null;
@@ -81,7 +81,7 @@ public class JBotConfig {
                             && (!configItem.getBotApiToken().isEmpty())
                             && isValidClassName(configItem.getBotModelClassName())) {
                         configItem.initDefaults();
-                        TelegramBot bot = JBots.getInstance(configItem);
+                        TelegramBot bot = BotProvider.getInstance(configItem);
                         if (bot != null) {
                             addConfigToList(configItem);
                         } else {
@@ -115,14 +115,6 @@ public class JBotConfig {
         }
     }
 
-    protected String getBotanProxyToken() {
-        return botanProxyToken;
-    }
-
-    protected boolean isAnalyticsEnabled() {
-        return analyticsEnabled;
-    }
-
     private boolean doesStringExistInList(String str, ArrayList<String> list) {
         for (String item : list) {
             if (item.equals(str)) {
@@ -130,6 +122,10 @@ public class JBotConfig {
             }
         }
         return false;
+    }
+
+    public BotStatsConfig getBotStatsConfig() {
+        return this.botStatsConfig;
     }
 
     private void initDefaults() {
@@ -162,8 +158,7 @@ public class JBotConfig {
         if (this.threadCount < 1) {
             this.threadCount = 1;
         }
-        this.analyticsEnabled = false;
-        this.botanProxyToken = null;
+        this.botStatsConfig = null;
     }
 
     public String getConstant(String key) {

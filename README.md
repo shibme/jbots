@@ -11,7 +11,7 @@ Add to your `pom.xml`
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.5.1</version>
+	<version>0.5.2</version>
 </dependency>
 ```
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
@@ -89,21 +89,25 @@ Create a file named `jbots-config.json` and add the following
 		"threadCount": 4,
 		"adminIdList": [1111111111111, 2222222222222],
 		"reportIntervalInSeconds": 604800,
-		"analyticsEnabled": true,
-		"botanProxyToken": "BotanToken1",
+		"botStatsConfig": {
+			"botStatsClassName": "com.example.TestAnalytics"
+		},
 		"constants": {
-			"channelName": "@ExampleChannel2"
+			"channelName": "@ExampleChannel_1"
 		}
 	},
 	{
 		"botApiToken": "YourBotApiToken2",
 		"botModelClassName": "com.example.YourModelClassName2",
-		"commandList": ["/start","/help","/status","/scr"],
+		"commandList": ["/start","/help"],
 		"threadCount": 2,
 		"adminIdList": [1111111111111, 2222222222222],
 		"reportIntervalInSeconds": 86400,
+		"botStatsConfig": {
+			"botStatsClassName": "com.example.TestAnalytics"
+		},
 		"constants": {
-			"channelName": "@ExampleChannel1"
+			"channelName": "@ExampleChannel_2"
 		}
 	}
 ]
@@ -113,6 +117,6 @@ Create a file named `jbots-config.json` and add the following
 * `commandList` - The list of supported commands you may have.
 * `threadCount` - The number of threads the bot should have.
 * `adminIdList` - Use [@GO_Robot](https://telegram.me/GO_Robot) to find your telegram ID and add it to admin list.
-* `reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running). 
-* `analyticsEnabled` - If set to true will enable analytics. Must have the right analytics/proxy dependency included.
-* `botanProxyToken` - If you're using botan analytics, all you need to do is mention the token, if not the framework will use `jbotstats` analytics when enabled.
+* `reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running).
+* `botStatsConfig` - The config object that defines the bot's analytics model.
+* `constants` - Any other constants that might be used along with the bots. updated and retrieved from a hash map.

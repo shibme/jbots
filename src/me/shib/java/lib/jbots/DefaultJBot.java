@@ -16,25 +16,25 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JBotDefaultModel extends JBotModel {
+public class DefaultJBot extends JBot {
 
     private static final Date startTime = new Date();
 
-    private static Logger logger = Logger.getLogger(JBotDefaultModel.class.getName());
+    private static Logger logger = Logger.getLogger(DefaultJBot.class.getName());
 
     private JBotConfig config;
-    private JBotModel appModel;
+    private JBot appModel;
     private TelegramBot bot;
 
-    protected JBotDefaultModel(JBotConfig config) {
+    protected DefaultJBot(JBotConfig config) {
         super(config);
         this.config = config;
         try {
             Class<?> clazz = Class.forName(config.getBotModelClassName());
             Constructor<?> ctor = clazz.getConstructor(JBotConfig.class);
-            appModel = (JBotModel) ctor.newInstance(config);
+            appModel = (JBot) ctor.newInstance(config);
         } catch (Exception e) {
-            logger.throwing(this.getClass().getName(), "JBotDefaultModel", e);
+            logger.throwing(this.getClass().getName(), "DefaultJBot", e);
             appModel = null;
         }
         bot = getBot();
@@ -62,7 +62,7 @@ public class JBotDefaultModel extends JBotModel {
             hostname = ip.getHostName();
             return hostname + "(" + ip.getHostAddress() + ")";
         } catch (UnknownHostException e) {
-            logger.throwing(JBotDefaultModel.class.getName(), "getHostInfo", e);
+            logger.throwing(DefaultJBot.class.getName(), "getHostInfo", e);
             return "Unknown Host";
         }
     }
@@ -152,7 +152,7 @@ public class JBotDefaultModel extends JBotModel {
     }
 
     private Message onStartAndHelp(Message message) throws IOException {
-        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.typing);
+        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
                         + bot.getIdentity().getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
@@ -189,7 +189,7 @@ public class JBotDefaultModel extends JBotModel {
             case "/scr":
                 if (config.isValidCommand("/scr") && config.isAdmin(message.getChat().getId())) {
                     try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.upload_document);
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
                         File screenShotFile = getCurrentScreenShotFile();
                         if (screenShotFile != null) {
                             Message returnMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
@@ -209,7 +209,7 @@ public class JBotDefaultModel extends JBotModel {
             case "/status":
                 if (config.isValidCommand("/status") && config.isAdmin(message.getChat().getId())) {
                     try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), TelegramBot.ChatAction.typing);
+                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
                         return sendStatusMessage(message.getChat().getId());
                     } catch (IOException e) {
                         logger.throwing(this.getClass().getName(), "onCommand", e);

@@ -15,9 +15,9 @@ public class JBotLauncher {
         if (configList != null) {
             for (JBotConfig conf : configList) {
                 int threadCount = conf.getThreadCount();
-                JBotWorker[] workers = new JBotWorker[threadCount];
+                BotWorker[] workers = new BotWorker[threadCount];
                 for (int i = 0; i < threadCount; i++) {
-                    workers[i] = new JBotWorker(conf);
+                    workers[i] = new BotWorker(conf);
                     workers[i].start();
                 }
             }

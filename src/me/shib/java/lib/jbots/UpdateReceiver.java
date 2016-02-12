@@ -9,32 +9,32 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JBotUpdateReceiver {
+public class UpdateReceiver {
 
-    private static Map<String, JBotUpdateReceiver> updateReceiverMap;
-    private static Logger logger = Logger.getLogger(JBotUpdateReceiver.class.getName());
+    private static Map<String, UpdateReceiver> updateReceiverMap;
+    private static Logger logger = Logger.getLogger(UpdateReceiver.class.getName());
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
     private boolean botStarted;
 
-    private JBotUpdateReceiver(JBotConfig config) {
+    private UpdateReceiver(JBotConfig config) {
         this.updatesQueue = new LinkedList<>();
-        this.bot = JBots.getInstance(config);
+        this.bot = BotProvider.getInstance(config);
         botStarted = false;
     }
 
-    protected static synchronized JBotUpdateReceiver getDefaultInstance(JBotConfig config) {
+    protected static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
         if (updateReceiverMap == null) {
             updateReceiverMap = new HashMap<>();
         }
         String botAPItoken = config.getBotApiToken();
-        JBotUpdateReceiver JBotUpdateReceiver = updateReceiverMap.get(botAPItoken);
-        if (JBotUpdateReceiver == null) {
-            JBotUpdateReceiver = new JBotUpdateReceiver(config);
-            updateReceiverMap.put(botAPItoken, JBotUpdateReceiver);
+        UpdateReceiver updateReceiver = updateReceiverMap.get(botAPItoken);
+        if (updateReceiver == null) {
+            updateReceiver = new UpdateReceiver(config);
+            updateReceiverMap.put(botAPItoken, updateReceiver);
         }
-        return JBotUpdateReceiver;
+        return updateReceiver;
     }
 
     private synchronized void fillUpdatesQueue() {

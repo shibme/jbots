@@ -6,15 +6,15 @@ import me.shib.java.lib.jtelebot.types.*;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public abstract class JBotModel {
+public abstract class JBot {
 
-    private static Logger logger = Logger.getLogger(JBotModel.class.getName());
+    private static Logger logger = Logger.getLogger(JBot.class.getName());
 
     private TelegramBot bot;
     private JBotConfig config;
 
-    public JBotModel(JBotConfig config) {
-        this.bot = JBots.getInstance(config);
+    public JBot(JBotConfig config) {
+        this.bot = BotProvider.getInstance(config);
         this.config = config;
     }
 

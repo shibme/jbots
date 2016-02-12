@@ -6,8 +6,9 @@
 		"threadCount": 4,
 		"adminIdList": [1111111111111, 2222222222222],
 		"reportIntervalInSeconds": 604800,
-		"analyticsEnabled": true,
-		"botanProxyToken": "BotanToken1",
+		"botStatsConfig": {
+			"botStatsClassName": "com.example.TestAnalytics"
+		},
 		"constants": {
 			"channelName": "@ExampleChannel2"
 		}
@@ -19,6 +20,9 @@
 		"threadCount": 2,
 		"adminIdList": [1111111111111, 2222222222222],
 		"reportIntervalInSeconds": 86400,
+		"botStatsConfig": {
+			"botStatsClassName": "com.example.TestAnalytics"
+		},
 		"constants": {
 			"channelName": "@ExampleChannel1"
 		}

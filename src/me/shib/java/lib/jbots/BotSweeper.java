@@ -5,20 +5,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class JBotSweeper extends Thread {
+public class BotSweeper extends Thread {
 
-    private static Map<String, JBotSweeper> tBotSweeperMap;
-    private static Logger logger = Logger.getLogger(JBotSweeper.class.getName());
+    private static Map<String, BotSweeper> tBotSweeperMap;
+    private static Logger logger = Logger.getLogger(BotSweeper.class.getName());
 
-    private JBotDefaultModel defaultModel;
+    private DefaultJBot defaultModel;
     private JBotConfig jBotConfig;
+    private boolean enabled;
 
-    private JBotSweeper(JBotDefaultModel defaultModel) {
+    private BotSweeper(DefaultJBot defaultModel) {
+        this.enabled = true;
         this.jBotConfig = defaultModel.getConfig();
         this.defaultModel = defaultModel;
     }
 
-    private static synchronized JBotSweeper getDefaultInstance(JBotDefaultModel defaultModel) {
+    private static synchronized BotSweeper getDefaultInstance(DefaultJBot defaultModel) {
         String botApiToken = defaultModel.getConfig().getBotApiToken();
         if (botApiToken == null) {
             return null;
@@ -26,17 +28,17 @@ public class JBotSweeper extends Thread {
         if (tBotSweeperMap == null) {
             tBotSweeperMap = new HashMap<>();
         }
-        JBotSweeper tBotSwp = tBotSweeperMap.get(botApiToken);
-        if (tBotSwp == null) {
-            tBotSwp = new JBotSweeper(defaultModel);
-            tBotSweeperMap.put(botApiToken, tBotSwp);
+        BotSweeper botSweeper = tBotSweeperMap.get(botApiToken);
+        if (botSweeper == null) {
+            botSweeper = new BotSweeper(defaultModel);
+            tBotSweeperMap.put(botApiToken, botSweeper);
         }
-        return tBotSwp;
+        return botSweeper;
     }
 
-    protected static synchronized void startDefaultInstance(JBotDefaultModel defaultModel) {
-        JBotSweeper defaultSweeper = JBotSweeper.getDefaultInstance(defaultModel);
-        if ((!defaultSweeper.isAlive()) && (defaultSweeper.getState() != State.TERMINATED)) {
+    protected static synchronized void startDefaultInstance(DefaultJBot defaultModel) {
+        BotSweeper defaultSweeper = BotSweeper.getDefaultInstance(defaultModel);
+        if ((defaultSweeper != null) && (!defaultSweeper.isAlive()) && (defaultSweeper.getState() != State.TERMINATED)) {
             defaultSweeper.start();
         }
     }
@@ -45,7 +47,7 @@ public class JBotSweeper extends Thread {
         long intervals = this.jBotConfig.getReportIntervalInSeconds() * 1000;
         long[] adminIdList = this.jBotConfig.getAdminIdList();
         if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
-            while (true) {
+            while (enabled) {
                 try {
                     for (long admin : adminIdList) {
                         this.defaultModel.sendStatusMessage(admin);
@@ -56,6 +58,10 @@ public class JBotSweeper extends Thread {
                 }
             }
         }
+    }
+
+    public void stopSweeper() {
+        enabled = false;
     }
 
     public void run() {
