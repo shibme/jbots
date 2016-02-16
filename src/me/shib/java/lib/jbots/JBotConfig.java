@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 
 public class JBotConfig {
 
-    private static final File defaultConfigFile = new File("jbots-config.json");
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 
     private static Logger logger = Logger.getLogger(JBotConfig.class.getName());
@@ -34,7 +33,8 @@ public class JBotConfig {
     public JBotConfig(String botApiToken, Class<JBot> botModelClass) {
         this.botModelClassName = botModelClass.getName();
         this.botApiToken = botApiToken;
-        adminIdList = null;
+        this.adminIdList = null;
+        this.botStatsConfig = null;
         initDefaults();
     }
 
@@ -54,9 +54,6 @@ public class JBotConfig {
     }
 
     public static synchronized JBotConfig[] getAllConfigList() {
-        if (configMap == null) {
-            addFileToConfigList(defaultConfigFile);
-        }
         if (configMap == null) {
             return null;
         }
@@ -158,7 +155,6 @@ public class JBotConfig {
         if (this.threadCount < 1) {
             this.threadCount = 1;
         }
-        this.botStatsConfig = null;
     }
 
     public String getConstant(String key) {

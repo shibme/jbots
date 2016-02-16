@@ -20,7 +20,6 @@ public class AnalyticsBot extends TelegramBot {
     protected AnalyticsBot(JBotStats jBotStats, TelegramBot bot) {
         this.bot = bot;
         this.analyticsWorker = new AnalyticsWorker(jBotStats);
-        this.analyticsWorker.start();
         this.lastKnownUpdateId = 0;
     }
 

@@ -3,6 +3,7 @@ package me.shib.java.lib.jbots;
 import me.shib.java.lib.rest.client.ServiceAdapter;
 import me.shib.java.lib.rest.client.ServiceResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +39,8 @@ public class JBotLauncher {
                     logger.throwing(JBotLauncher.class.getName(), "sendStatusMessage", e);
                 }
                 JBotConfig.addJSONtoConfigList(configJson);
+            } else {
+                JBotConfig.addFileToConfigList(new File("jbots-config.json"));
             }
             JBotConfig[] configList = JBotConfig.getAllConfigList();
             launchBots(configList);
