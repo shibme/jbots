@@ -29,6 +29,7 @@ public class BotProvider {
                 JBotStats jBotStats = null;
                 BotStatsConfig botStatsConfig = config.getBotStatsConfig();
                 if (botStatsConfig != null) {
+                    botStatsConfig.setBotUserId(botService.getIdentity().getId());
                     try {
                         Class<?> clazz = Class.forName(botStatsConfig.getBotStatsClassName());
                         Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class);
