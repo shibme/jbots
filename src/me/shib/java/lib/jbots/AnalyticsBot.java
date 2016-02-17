@@ -164,6 +164,7 @@ public class AnalyticsBot extends TelegramBot {
                 if (update.getUpdate_id() > lastKnownUpdateId) {
                     lastKnownUpdateId = update.getUpdate_id();
                     data = getNewUpdateAnalyticsData(timeout, limit, offset);
+                    data.setReturned(update);
                     data.setAccessTime(accessTime);
                     analyticsWorker.putData(data);
                 }
@@ -181,25 +182,27 @@ public class AnalyticsBot extends TelegramBot {
     @Override
     public synchronized Update[] getUpdates(int timeout, int limit) throws IOException {
         Date accessTime = new Date();
-        AnalyticsData data = getNewUpdateAnalyticsData(timeout, limit, -1);
+        AnalyticsData data;
         IOException ioException = null;
         Update[] updates = null;
         try {
             updates = bot.getUpdates(timeout, limit);
         } catch (IOException e) {
             ioException = e;
-            data.setIoException(ioException);
         }
         if (updates != null) {
             for (Update update : updates) {
                 if (update.getUpdate_id() > lastKnownUpdateId) {
                     lastKnownUpdateId = update.getUpdate_id();
                     data = getNewUpdateAnalyticsData(timeout, limit, -1);
+                    data.setReturned(update);
                     data.setAccessTime(accessTime);
                     analyticsWorker.putData(data);
                 }
             }
         } else {
+            data = getNewUpdateAnalyticsData(timeout, limit, -1);
+            data.setIoException(ioException);
             data.setAccessTime(accessTime);
             analyticsWorker.putData(data);
         }
