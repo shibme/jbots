@@ -85,8 +85,10 @@ public final class DefaultJBot extends JBot {
         }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
+        } else if (!config.isDefaultWorkerDisabled()) {
+            return forwardToAdmins(message);
         }
-        return forwardToAdmins(message);
+        return null;
     }
 
     public Message onMessageFromAdmin(Message message) {
@@ -96,34 +98,35 @@ public final class DefaultJBot extends JBot {
         }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
-        }
-        try {
-            long replyToUser = message.getReply_to_message().getForward_from().getId();
-            if (replyToUser > 0) {
-                if (message.getText() != null) {
-                    return bot.sendMessage(new ChatId(replyToUser), message.getText());
-                } else if (message.getDocument() != null) {
-                    return bot.sendDocument(new ChatId(replyToUser),
-                            new TelegramFile(message.getDocument().getFile_id()));
-                } else if (message.getVideo() != null) {
-                    return bot.sendVideo(new ChatId(replyToUser),
-                            new TelegramFile(message.getVideo().getFile_id()));
-                } else if (message.getPhoto() != null) {
-                    return bot.sendPhoto(new ChatId(replyToUser),
-                            new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
-                } else if (message.getAudio() != null) {
-                    return bot.sendDocument(new ChatId(replyToUser),
-                            new TelegramFile(message.getDocument().getFile_id()));
-                } else if (message.getVoice() != null) {
-                    return bot.sendDocument(new ChatId(replyToUser),
-                            new TelegramFile(message.getDocument().getFile_id()));
-                } else if (message.getSticker() != null) {
-                    return bot.sendDocument(new ChatId(replyToUser),
-                            new TelegramFile(message.getDocument().getFile_id()));
+        } else if (!config.isDefaultWorkerDisabled()) {
+            try {
+                long replyToUser = message.getReply_to_message().getForward_from().getId();
+                if (replyToUser > 0) {
+                    if (message.getText() != null) {
+                        return bot.sendMessage(new ChatId(replyToUser), message.getText());
+                    } else if (message.getDocument() != null) {
+                        return bot.sendDocument(new ChatId(replyToUser),
+                                new TelegramFile(message.getDocument().getFile_id()));
+                    } else if (message.getVideo() != null) {
+                        return bot.sendVideo(new ChatId(replyToUser),
+                                new TelegramFile(message.getVideo().getFile_id()));
+                    } else if (message.getPhoto() != null) {
+                        return bot.sendPhoto(new ChatId(replyToUser),
+                                new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
+                    } else if (message.getAudio() != null) {
+                        return bot.sendDocument(new ChatId(replyToUser),
+                                new TelegramFile(message.getDocument().getFile_id()));
+                    } else if (message.getVoice() != null) {
+                        return bot.sendDocument(new ChatId(replyToUser),
+                                new TelegramFile(message.getDocument().getFile_id()));
+                    } else if (message.getSticker() != null) {
+                        return bot.sendDocument(new ChatId(replyToUser),
+                                new TelegramFile(message.getDocument().getFile_id()));
+                    }
                 }
+            } catch (Exception e) {
+                logger.throwing(this.getClass().getName(), "onMessageFromAdmin", e);
             }
-        } catch (Exception e) {
-            logger.throwing(this.getClass().getName(), "onMessageFromAdmin", e);
         }
         return null;
     }
@@ -266,12 +269,13 @@ public final class DefaultJBot extends JBot {
         }
         if (appModelResponseMessage != null) {
             return appModelResponseMessage;
-        }
-        try {
-            return bot.sendMessage(new ChatId(chatId),
-                    "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
-        } catch (IOException e) {
-            logger.throwing(this.getClass().getName(), "sendStatusMessage", e);
+        } else if (!config.isDefaultWorkerDisabled()) {
+            try {
+                return bot.sendMessage(new ChatId(chatId),
+                        "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
+            } catch (IOException e) {
+                logger.throwing(this.getClass().getName(), "sendStatusMessage", e);
+            }
         }
         return null;
     }

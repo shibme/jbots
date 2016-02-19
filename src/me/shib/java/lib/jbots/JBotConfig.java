@@ -14,8 +14,6 @@ import java.util.logging.Logger;
 
 public final class JBotConfig {
 
-    private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
-
     private static Logger logger = Logger.getLogger(JBotConfig.class.getName());
     private static JsonLib jsonLib = new JsonLib();
     private static Map<String, JBotConfig> configMap;
@@ -25,6 +23,7 @@ public final class JBotConfig {
     private String[] commandList;
     private int threadCount;
     private long[] adminIdList;
+    private boolean defaultWorkerDisabled;
     private long reportIntervalInSeconds;
     private BotStatsConfig botStatsConfig;
     private Map<String, String> constants;
@@ -35,6 +34,7 @@ public final class JBotConfig {
         this.botApiToken = botApiToken;
         this.adminIdList = null;
         this.botStatsConfig = null;
+        this.defaultWorkerDisabled = false;
         initDefaults();
     }
 
@@ -112,6 +112,14 @@ public final class JBotConfig {
         }
     }
 
+    public void setCommandList(String[] commandList) {
+        this.commandList = commandList;
+    }
+
+    public boolean isDefaultWorkerDisabled() {
+        return defaultWorkerDisabled;
+    }
+
     private boolean doesStringExistInList(String str, ArrayList<String> list) {
         for (String item : list) {
             if (item.equals(str)) {
@@ -127,25 +135,6 @@ public final class JBotConfig {
 
     private void initDefaults() {
         this.userModeSet = new HashSet<>();
-        if (this.commandList == null) {
-            this.commandList = defaultCommands;
-        } else {
-            ArrayList<String> newCommandList = new ArrayList<>();
-            for (String command : this.commandList) {
-                if (!doesStringExistInList(command, newCommandList)) {
-                    newCommandList.add(command);
-                }
-            }
-            if (defaultCommands != null) {
-                for (String command : defaultCommands) {
-                    if (!doesStringExistInList(command, newCommandList)) {
-                        newCommandList.add(command);
-                    }
-                }
-            }
-            this.commandList = new String[newCommandList.size()];
-            this.commandList = newCommandList.toArray(this.commandList);
-        }
         if (this.reportIntervalInSeconds < 0) {
             this.reportIntervalInSeconds = 0;
         }

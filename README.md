@@ -82,34 +82,44 @@ public class YourModelClassName extends JBotModel {
 Create a file named `jbots-config.json` and add the following
 ```json
 [
-	{
-		"botApiToken": "YourBotApiToken1",
-		"botModelClassName": "com.example.YourModelClassName1",
-		"commandList": ["/start","/help","/status","/scr"],
-		"threadCount": 4,
-		"adminIdList": [1111111111111, 2222222222222],
-		"reportIntervalInSeconds": 604800,
-		"botStatsConfig": {
-			"botStatsClassName": "com.example.TestAnalytics"
-		},
-		"constants": {
-			"channelName": "@ExampleChannel_1"
-		}
-	},
-	{
-		"botApiToken": "YourBotApiToken2",
-		"botModelClassName": "com.example.YourModelClassName2",
-		"commandList": ["/start","/help"],
-		"threadCount": 2,
-		"adminIdList": [1111111111111, 2222222222222],
-		"reportIntervalInSeconds": 86400,
-		"botStatsConfig": {
-			"botStatsClassName": "com.example.TestAnalytics"
-		},
-		"constants": {
-			"channelName": "@ExampleChannel_2"
-		}
-	}
+  {
+    "botApiToken": "YourBotApiToken1",
+    "botModelClassName": "com.example.YourModelClassName1",
+    "commandList": ["/start","/help","/status","/scr"],
+    "threadCount": 4,
+    "adminIdList": [1111111111111, 2222222222222],
+    "defaultWorkerDisabled": true,
+    "reportIntervalInSeconds": 604800,
+    "botStatsConfig": {
+      "botStatsClassName": "com.example.TestAnalytics",
+      "token": "AnalyticsTokenGoesHere",
+      "botStatsConstants": {
+        "encryptionPassPhrase": "SampleEncryptionPassPhrase"
+      }
+    },
+    "constants": {
+      "channelName": "@ExampleChannel2"
+    }
+  },
+  {
+    "botApiToken": "YourBotApiToken2",
+    "botModelClassName": "com.example.YourModelClassName2",
+    "commandList": ["/start","/help","/status","/scr"],
+    "threadCount": 2,
+    "adminIdList": [1111111111111, 2222222222222],
+    "defaultWorkerDisabled": false,
+    "reportIntervalInSeconds": 86400,
+    "botStatsConfig": {
+      "botStatsClassName": "com.example.TestAnalytics",
+      "token": "AnalyticsTokenGoesHere",
+      "botStatsConstants": {
+        "encryptionPassPhrase": "SampleEncryptionPassPhrase"
+      }
+    },
+    "constants": {
+      "channelName": "@ExampleChannel1"
+    }
+  }
 ]
 ```
 * `botApiToken` - The API token that you receive when you create a bot with [@BotFather](https://telegram.me/BotFather).
@@ -117,6 +127,7 @@ Create a file named `jbots-config.json` and add the following
 * `commandList` - The list of supported commands you may have.
 * `threadCount` - The number of threads the bot should have.
 * `adminIdList` - Use [@GO_Robot](https://telegram.me/GO_Robot) to find your telegram ID and add it to admin list.
+* `defaultWorkerDisabled` - If set true, the default responses that happen in case of failures won't be sent.
 * `reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running).
 * `botStatsConfig` - The config object that defines the bot's analytics model.
 * `constants` - Any other constants that might be used along with the bots. updated and retrieved from a hash map.
