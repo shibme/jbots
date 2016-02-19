@@ -39,7 +39,7 @@ public class BotProvider {
                     }
                 }
                 if (jBotStats != null) {
-                    bot = new AnalyticsBot(jBotStats, botService);
+                    bot = new AnalyticsBot(botService, jBotStats);
                 } else {
                     bot = botService;
                 }

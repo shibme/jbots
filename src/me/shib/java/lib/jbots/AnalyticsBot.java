@@ -10,17 +10,37 @@ import me.shib.java.lib.rest.client.HTTPFileDownloader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnalyticsBot extends TelegramBot {
 
     private TelegramBot bot;
+    private JBotStats jBotStats;
     private AnalyticsWorker analyticsWorker;
     private long lastKnownUpdateId;
+    private Map<Long, Map<String, String>> analyticsUserURLMap;
 
-    protected AnalyticsBot(JBotStats jBotStats, TelegramBot bot) {
+    protected AnalyticsBot(TelegramBot bot, JBotStats jBotStats) {
         this.bot = bot;
+        this.jBotStats = jBotStats;
         this.analyticsWorker = new AnalyticsWorker(jBotStats);
         this.lastKnownUpdateId = 0;
+        this.analyticsUserURLMap = new HashMap<>();
+    }
+
+    protected String getAnalyticsRedirectedURL(long user_id, String url) {
+        Map<String, String> urlMap = analyticsUserURLMap.get(user_id);
+        if (urlMap == null) {
+            urlMap = new HashMap<>();
+            analyticsUserURLMap.put(user_id, urlMap);
+        }
+        String analyticsURL = urlMap.get(url);
+        if (analyticsURL == null) {
+            analyticsURL = this.jBotStats.getAnalyticsRedirectedURL(user_id, url);
+            urlMap.put(url, analyticsURL);
+        }
+        return analyticsURL;
     }
 
     @Override

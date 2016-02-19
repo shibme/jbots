@@ -18,6 +18,15 @@ public abstract class JBot {
         this.config = config;
     }
 
+    public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {
+        try {
+            AnalyticsBot analyticsBot = (AnalyticsBot) bot;
+            return analyticsBot.getAnalyticsRedirectedURL(user_id, url);
+        } catch (Exception e) {
+            return url;
+        }
+    }
+
     public TelegramBot getBot() {
         return bot;
     }
