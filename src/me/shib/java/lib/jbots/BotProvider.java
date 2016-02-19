@@ -3,6 +3,7 @@ package me.shib.java.lib.jbots;
 import me.shib.java.lib.jbotstats.BotStatsConfig;
 import me.shib.java.lib.jbotstats.JBotStats;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.User;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -29,11 +30,10 @@ public class BotProvider {
                 JBotStats jBotStats = null;
                 BotStatsConfig botStatsConfig = config.getBotStatsConfig();
                 if (botStatsConfig != null) {
-                    botStatsConfig.setBotUserId(botService.getIdentity().getId());
                     try {
                         Class<?> clazz = Class.forName(botStatsConfig.getBotStatsClassName());
-                        Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class);
-                        jBotStats = (JBotStats) ctor.newInstance(botStatsConfig);
+                        Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class, User.class);
+                        jBotStats = (JBotStats) ctor.newInstance(botStatsConfig, botService.getIdentity());
                     } catch (Exception e) {
                         logger.throwing(BotProvider.class.getName(), "getInstance", e);
                     }
