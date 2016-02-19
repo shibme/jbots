@@ -38,7 +38,9 @@ public final class AnalyticsBot extends TelegramBot {
         String analyticsURL = urlMap.get(url);
         if (analyticsURL == null) {
             analyticsURL = this.jBotStats.getAnalyticsRedirectedURL(user_id, url);
-            urlMap.put(url, analyticsURL);
+            if (analyticsURL != null) {
+                urlMap.put(url, analyticsURL);
+            }
         }
         return analyticsURL;
     }
