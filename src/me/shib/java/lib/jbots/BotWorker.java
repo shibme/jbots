@@ -8,7 +8,7 @@ import me.shib.java.lib.jtelebot.types.Update;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BotWorker extends Thread {
+public final class BotWorker extends Thread {
 
     private static int threadCounter = 0;
     private static Logger logger = Logger.getLogger(BotWorker.class.getName());

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JBotLauncher {
+public final class JBotLauncher {
 
     private static Logger logger = Logger.getLogger(JBotLauncher.class.getName());
 

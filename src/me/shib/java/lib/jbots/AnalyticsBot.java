@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AnalyticsBot extends TelegramBot {
+public final class AnalyticsBot extends TelegramBot {
 
     private TelegramBot bot;
     private JBotStats jBotStats;

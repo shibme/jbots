@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class BotSweeper extends Thread {
+public final class BotSweeper extends Thread {
 
     private static Map<String, BotSweeper> tBotSweeperMap;
     private static Logger logger = Logger.getLogger(BotSweeper.class.getName());

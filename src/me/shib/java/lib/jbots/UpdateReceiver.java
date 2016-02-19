@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UpdateReceiver {
+public final class UpdateReceiver {
 
     private static Map<String, UpdateReceiver> updateReceiverMap;
     private static Logger logger = Logger.getLogger(UpdateReceiver.class.getName());

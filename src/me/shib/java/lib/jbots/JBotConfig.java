@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JBotConfig {
+public final class JBotConfig {
 
     private static final String[] defaultCommands = {"/start", "/status", "/scr", "/usermode", "/adminmode"};
 

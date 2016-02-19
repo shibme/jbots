@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class BotProvider {
+public final class BotProvider {
 
     private static Logger logger = Logger.getLogger(BotProvider.class.getName());
     private static Map<String, TelegramBot> jBotsMap;

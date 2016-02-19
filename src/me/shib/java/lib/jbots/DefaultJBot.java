@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DefaultJBot extends JBot {
+public final class DefaultJBot extends JBot {
 
     private static final Date startTime = new Date();
 

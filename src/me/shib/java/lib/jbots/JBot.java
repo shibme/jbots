@@ -21,10 +21,14 @@ public abstract class JBot {
     public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {
         try {
             AnalyticsBot analyticsBot = (AnalyticsBot) bot;
-            return analyticsBot.getAnalyticsRedirectedURL(user_id, url);
+            String analyticsURL = analyticsBot.getAnalyticsRedirectedURL(user_id, url);
+            if (analyticsURL != null) {
+                return analyticsURL;
+            }
         } catch (Exception e) {
-            return url;
+            logger.throwing(JBot.class.getName(), "getAnalyticsRedirectedURL", e);
         }
+        return url;
     }
 
     public TelegramBot getBot() {
@@ -40,7 +44,7 @@ public abstract class JBot {
                         bot.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
                                 message.getMessage_id());
                     } catch (IOException e) {
-                        logger.throwing(JBotLauncher.class.getName(), "forwardToAdmins", e);
+                        logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
                     }
                 }
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
@@ -50,7 +54,7 @@ public abstract class JBot {
             return bot.sendMessage(new ChatId(message.getChat().getId()),
                     "The support team is unavailable. Please try later.", null, false, message.getMessage_id());
         } catch (IOException e) {
-            logger.throwing(JBotLauncher.class.getName(), "forwardToAdmins", e);
+            logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
             return null;
         }
     }
