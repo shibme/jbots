@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/shibme/jbots.svg)](https://travis-ci.org/shibme/jbots)
 [![Dependency Status](https://www.versioneye.com/user/projects/56adffd47e03c700377e0046/badge.svg?style=flat)](https://www.versioneye.com/user/projects/56adffd47e03c700377e0046)
 [![Download](https://api.bintray.com/packages/shibme/maven/jbots/images/download.svg)](https://bintray.com/shibme/maven/jbots/_latestVersion)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/shibme/jbots.svg)](http://isitmaintained.com/project/shibme/jbots "Percentage of issues still open")
 
 A java framework for creating Telegram Bots with less efforts
 
