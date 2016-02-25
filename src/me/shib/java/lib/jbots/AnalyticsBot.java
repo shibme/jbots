@@ -235,18 +235,19 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendMessage(ChatId chat_id, String text, ParseMode parse_mode, boolean disable_web_page_preview, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendMessage(ChatId chat_id, String text, boolean disable_notification, ParseMode parse_mode, boolean disable_web_page_preview, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendMessage");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("text", text);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("parse_mode", parse_mode);
         data.setValue("disable_web_page_preview", disable_web_page_preview);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendMessage(chat_id, text, parse_mode, disable_web_page_preview, reply_to_message_id, reply_markup);
+            message = bot.sendMessage(chat_id, text, disable_notification, parse_mode, disable_web_page_preview, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -260,15 +261,16 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message forwardMessage(ChatId chat_id, ChatId from_chat_id, long message_id) throws IOException {
+    public Message forwardMessage(ChatId chat_id, ChatId from_chat_id, long message_id, boolean disable_notification) throws IOException {
         AnalyticsData data = new AnalyticsData("forwardMessage");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("from_chat_id", from_chat_id);
         data.setValue("message_id", message_id);
+        data.setValue("disable_notification", disable_notification);
         try {
-            message = bot.forwardMessage(chat_id, from_chat_id, message_id);
+            message = bot.forwardMessage(chat_id, from_chat_id, message_id, disable_notification);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -281,17 +283,18 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendPhoto(ChatId chat_id, TelegramFile photo, String caption, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendPhoto(ChatId chat_id, TelegramFile photo, boolean disable_notification, String caption, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendPhoto");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("photo", photo);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("caption", caption);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendPhoto(chat_id, photo, caption, reply_to_message_id, reply_markup);
+            message = bot.sendPhoto(chat_id, photo, disable_notification, caption, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -305,19 +308,20 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendAudio(ChatId chat_id, TelegramFile audio, int duration, String performer, String title, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendAudio(ChatId chat_id, TelegramFile audio, boolean disable_notification, int duration, String performer, String title, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendAudio");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("audio", audio);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("duration", duration);
         data.setValue("performer", performer);
         data.setValue("title", title);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendAudio(chat_id, audio, duration, performer, title, reply_to_message_id, reply_markup);
+            message = bot.sendAudio(chat_id, audio, disable_notification, duration, performer, title, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -331,16 +335,17 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendDocument(ChatId chat_id, TelegramFile document, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendDocument(ChatId chat_id, TelegramFile document, boolean disable_notification, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendDocument");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("document", document);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendDocument(chat_id, document, reply_to_message_id, reply_markup);
+            message = bot.sendDocument(chat_id, document, disable_notification, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -354,16 +359,17 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendSticker(ChatId chat_id, TelegramFile sticker, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendSticker(ChatId chat_id, TelegramFile sticker, boolean disable_notification, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendSticker");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("sticker", sticker);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendSticker(chat_id, sticker, reply_to_message_id, reply_markup);
+            message = bot.sendSticker(chat_id, sticker, disable_notification, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -377,18 +383,19 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendVideo(ChatId chat_id, TelegramFile video, int duration, String caption, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendVideo(ChatId chat_id, TelegramFile video, boolean disable_notification, int duration, String caption, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendVideo");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("video", video);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("duration", duration);
         data.setValue("caption", caption);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendVideo(chat_id, video, duration, caption, reply_to_message_id, reply_markup);
+            message = bot.sendVideo(chat_id, video, disable_notification, duration, caption, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -402,17 +409,18 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendVoice(ChatId chat_id, TelegramFile voice, int duration, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendVoice(ChatId chat_id, TelegramFile voice, boolean disable_notification, int duration, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendVoice");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("voice", voice);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("duration", duration);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendVoice(chat_id, voice, duration, reply_to_message_id, reply_markup);
+            message = bot.sendVoice(chat_id, voice, disable_notification, duration, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;
@@ -426,17 +434,18 @@ public final class AnalyticsBot extends TelegramBot {
     }
 
     @Override
-    public Message sendLocation(ChatId chat_id, float latitude, float longitude, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
+    public Message sendLocation(ChatId chat_id, float latitude, float longitude, boolean disable_notification, long reply_to_message_id, ReplyMarkup reply_markup) throws IOException {
         AnalyticsData data = new AnalyticsData("sendLocation");
         IOException ioException = null;
         Message message = null;
         data.setValue("chat_id", chat_id);
         data.setValue("latitude", latitude);
         data.setValue("longitude", longitude);
+        data.setValue("disable_notification", disable_notification);
         data.setValue("reply_to_message_id", reply_to_message_id);
         data.setValue("reply_markup", reply_markup);
         try {
-            message = bot.sendLocation(chat_id, latitude, longitude, reply_to_message_id, reply_markup);
+            message = bot.sendLocation(chat_id, latitude, longitude, disable_notification, reply_to_message_id, reply_markup);
             data.setReturned(message);
         } catch (IOException e) {
             ioException = e;

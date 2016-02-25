@@ -12,7 +12,7 @@ Add to your `pom.xml`
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.5.2</version>
+	<version>0.5.3</version>
 </dependency>
 ```
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
@@ -79,7 +79,7 @@ public class YourModelClassName extends JBotModel {
 }
 ```
 
-#####Sample Config file:
+##### Sample Config file
 Create a file named `jbots-config.json` and add the following
 ```json
 [

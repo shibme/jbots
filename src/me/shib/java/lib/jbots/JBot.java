@@ -49,10 +49,10 @@ public abstract class JBot {
                 }
                 return bot.sendMessage(new ChatId(message.getChat().getId()),
                         "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
-                        ParseMode.Markdown, false, message.getMessage_id());
+                        false, ParseMode.Markdown, false, message.getMessage_id());
             }
             return bot.sendMessage(new ChatId(message.getChat().getId()),
-                    "The support team is unavailable. Please try later.", null, false, message.getMessage_id());
+                    "The support team is unavailable. Please try later.", false, null, false, message.getMessage_id());
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
             return null;

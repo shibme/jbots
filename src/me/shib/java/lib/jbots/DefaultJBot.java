@@ -159,7 +159,7 @@ public final class DefaultJBot extends JBot {
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
                         + bot.getIdentity().getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
-                ParseMode.Markdown);
+                false, ParseMode.Markdown);
     }
 
     public Message onCommand(Message message) {
@@ -223,7 +223,7 @@ public final class DefaultJBot extends JBot {
                 if (config.isValidCommand("/usermode") && config.isAdmin(message.getChat().getId())) {
                     config.setUserMode(message.getFrom().getId());
                     try {
-                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
+                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", false, ParseMode.Markdown);
                     } catch (IOException e) {
                         logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
@@ -233,7 +233,7 @@ public final class DefaultJBot extends JBot {
                 if (config.isValidCommand("/adminmode") && config.isAdmin(message.getChat().getId())) {
                     config.setAdminMode(message.getFrom().getId());
                     try {
-                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
+                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", false, ParseMode.Markdown);
                     } catch (IOException e) {
                         logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
