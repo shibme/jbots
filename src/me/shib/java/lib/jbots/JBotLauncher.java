@@ -28,17 +28,22 @@ public final class JBotLauncher {
     public static void main(String[] args) {
         if (args.length <= 1) {
             if (args.length == 1) {
-                String configJson = null;
-                try {
-                    ServiceAdapter adapter = new ServiceAdapter(args[0]);
-                    ServiceResponse response = adapter.get(null);
-                    if (response.getStatusCode() == 200) {
-                        configJson = response.getResponse();
+                File possibleConfigFile = new File(args[0]);
+                if (possibleConfigFile.exists()) {
+                    JBotConfig.addFileToConfigList(possibleConfigFile);
+                } else {
+                    String configJson = null;
+                    try {
+                        ServiceAdapter adapter = new ServiceAdapter(args[0]);
+                        ServiceResponse response = adapter.get(null);
+                        if (response.getStatusCode() == 200) {
+                            configJson = response.getResponse();
+                        }
+                    } catch (IOException e) {
+                        logger.throwing(JBotLauncher.class.getName(), "sendStatusMessage", e);
                     }
-                } catch (IOException e) {
-                    logger.throwing(JBotLauncher.class.getName(), "sendStatusMessage", e);
+                    JBotConfig.addJSONtoConfigList(configJson);
                 }
-                JBotConfig.addJSONtoConfigList(configJson);
             } else {
                 JBotConfig.addFileToConfigList(new File("jbots-config.json"));
             }
