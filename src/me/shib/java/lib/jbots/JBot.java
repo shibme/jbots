@@ -10,7 +10,7 @@ public abstract class JBot {
 
     private static Logger logger = Logger.getLogger(JBot.class.getName());
 
-    private TelegramBot bot;
+    protected TelegramBot bot;
     private JBotConfig config;
 
     public JBot(JBotConfig config) {
