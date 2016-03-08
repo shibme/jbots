@@ -7,7 +7,7 @@
     <artifactId>jbots</artifactId>
     <version>0.5.4</version>
     <name>JBots</name>
-    <description>A java framework for creating Telegram Bots with less efforts</description>
+    <description>A java framework for creating Telegram Bots</description>
     <url>https://github.com/shibme/jbots</url>
 
     <issueManagement>

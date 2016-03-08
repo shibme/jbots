@@ -4,7 +4,7 @@
 [![Download](https://api.bintray.com/packages/shibme/maven/jbots/images/download.svg)](https://bintray.com/shibme/maven/jbots/_latestVersion)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/shibme/jbots.svg)](http://isitmaintained.com/project/shibme/jbots "Percentage of issues still open")
 
-A java framework for creating Telegram Bots with less efforts
+A java framework for creating Telegram Bots
 
 ### Maven Dependency for Consumers
 Add to your `pom.xml`
