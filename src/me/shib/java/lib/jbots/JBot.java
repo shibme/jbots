@@ -11,7 +11,7 @@ public abstract class JBot {
     private static Logger logger = Logger.getLogger(JBot.class.getName());
 
     protected TelegramBot bot;
-    private JBotConfig config;
+    protected JBotConfig config;
 
     public JBot(JBotConfig config) {
         this.bot = BotProvider.getInstance(config);
@@ -31,8 +31,39 @@ public abstract class JBot {
         return url;
     }
 
-    public TelegramBot getBot() {
-        return bot;
+    private static boolean isValidText(String text) {
+        return text != null && text.matches("^[A-Za-z0-9]+$");
+    }
+
+    private static String getProperName(String firstName, String lastName, String username) {
+        StringBuilder nameBuilder = new StringBuilder();
+        if (isValidText(firstName)) {
+            nameBuilder.append(firstName);
+        }
+        if (isValidText(lastName)) {
+            if (!nameBuilder.toString().isEmpty()) {
+                nameBuilder.append(" ");
+            }
+            nameBuilder.append(lastName);
+        }
+        if (nameBuilder.toString().isEmpty() && isValidText(username)) {
+            nameBuilder.append(username);
+        }
+        return nameBuilder.toString();
+    }
+
+    public static String getProperName(Chat chat) {
+        if (chat != null) {
+            return getProperName(chat.getFirst_name(), chat.getLast_name(), chat.getUsername());
+        }
+        return "";
+    }
+
+    public static String getProperName(User user) {
+        if (user != null) {
+            return getProperName(user.getFirst_name(), user.getLast_name(), user.getUsername());
+        }
+        return "";
     }
 
     public Message forwardToAdmins(Message message) {

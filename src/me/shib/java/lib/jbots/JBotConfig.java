@@ -24,6 +24,7 @@ public final class JBotConfig {
     private int threadCount;
     private long[] adminIdList;
     private boolean defaultWorkerDisabled;
+    private boolean missedChatHandlingDisabled;
     private long reportIntervalInSeconds;
     private BotStatsConfig botStatsConfig;
     private Map<String, String> constants;
@@ -35,6 +36,7 @@ public final class JBotConfig {
         this.adminIdList = null;
         this.botStatsConfig = null;
         this.defaultWorkerDisabled = false;
+        this.missedChatHandlingDisabled = false;
         initDefaults();
     }
 
@@ -118,6 +120,10 @@ public final class JBotConfig {
 
     public boolean isDefaultWorkerDisabled() {
         return defaultWorkerDisabled;
+    }
+
+    public boolean isMissedChatHandlingDisabled() {
+        return missedChatHandlingDisabled;
     }
 
     private boolean doesStringExistInList(String str, ArrayList<String> list) {

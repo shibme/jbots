@@ -1,7 +1,6 @@
 package me.shib.java.lib.jbots;
 
 
-import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.*;
 
 import javax.imageio.ImageIO;
@@ -24,7 +23,6 @@ public final class DefaultJBot extends JBot {
 
     private JBotConfig config;
     private JBot appModel;
-    private TelegramBot bot;
 
     protected DefaultJBot(JBotConfig config) {
         super(config);
@@ -37,7 +35,6 @@ public final class DefaultJBot extends JBot {
             logger.throwing(this.getClass().getName(), "DefaultJBot", e);
             appModel = null;
         }
-        bot = getBot();
     }
 
     private static String getUpTime() {

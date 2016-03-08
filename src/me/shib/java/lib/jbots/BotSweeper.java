@@ -7,8 +7,9 @@ import java.util.logging.Logger;
 
 public final class BotSweeper extends Thread {
 
+    private static final Logger logger = Logger.getLogger(BotSweeper.class.getName());
+
     private static Map<String, BotSweeper> tBotSweeperMap;
-    private static Logger logger = Logger.getLogger(BotSweeper.class.getName());
 
     private DefaultJBot defaultModel;
     private JBotConfig jBotConfig;

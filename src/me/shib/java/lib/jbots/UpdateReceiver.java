@@ -2,6 +2,7 @@ package me.shib.java.lib.jbots;
 
 
 import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.Message;
 import me.shib.java.lib.jtelebot.types.Update;
 
 import java.io.IOException;
@@ -11,17 +12,23 @@ import java.util.logging.Logger;
 
 public final class UpdateReceiver {
 
+    private static final Logger logger = Logger.getLogger(UpdateReceiver.class.getName());
+    private static final int allowRequestsBeforeInterval = 10;
+
     private static Map<String, UpdateReceiver> updateReceiverMap;
-    private static Logger logger = Logger.getLogger(UpdateReceiver.class.getName());
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
+    private JBotConfig config;
     private boolean botStarted;
+    private long startTime;
 
     private UpdateReceiver(JBotConfig config) {
+        this.startTime = (new Date().getTime() / 1000) - allowRequestsBeforeInterval;
         this.updatesQueue = new LinkedList<>();
         this.bot = BotProvider.getInstance(config);
-        botStarted = false;
+        this.botStarted = false;
+        this.config = config;
     }
 
     protected static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
@@ -35,6 +42,36 @@ public final class UpdateReceiver {
             updateReceiverMap.put(botAPItoken, updateReceiver);
         }
         return updateReceiver;
+    }
+
+    protected long getStartTime() {
+        return startTime;
+    }
+
+    protected synchronized List<Message> getMissedMessageList() {
+        List<Message> missedMessages = new ArrayList<>();
+        Set<Long> missedChatIds = new HashSet<>();
+        if (!config.isMissedChatHandlingDisabled()) {
+            try {
+                Update[] updates = bot.getUpdatesImmediately();
+                while ((updates != null) && (updates.length > 0)) {
+                    for (Update update : updates) {
+                        if ((update.getMessage() != null) && (update.getMessage().getDate() < startTime)) {
+                            if (!missedChatIds.contains(update.getMessage().getChat().getId())) {
+                                missedChatIds.add(update.getMessage().getChat().getId());
+                                missedMessages.add(update.getMessage());
+                            }
+                        } else {
+                            updatesQueue.add(update);
+                        }
+                    }
+                    updates = bot.getUpdatesImmediately();
+                }
+            } catch (IOException e) {
+                logger.throwing(this.getClass().getName(), "getMissedMessageList", e);
+            }
+        }
+        return missedMessages;
     }
 
     private synchronized void fillUpdatesQueue() {

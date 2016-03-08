@@ -2,9 +2,13 @@ package me.shib.java.lib.jbots;
 
 
 import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.ChatId;
 import me.shib.java.lib.jtelebot.types.Message;
+import me.shib.java.lib.jtelebot.types.ParseMode;
 import me.shib.java.lib.jtelebot.types.Update;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +30,7 @@ public final class BotWorker extends Thread {
             if ((config.getBotApiToken() != null) && (!config.getBotApiToken().isEmpty())) {
                 updateReceiver = UpdateReceiver.getDefaultInstance(this.config);
                 defaultModel = new DefaultJBot(config);
-                bot = defaultModel.getBot();
+                bot = defaultModel.bot;
                 enabled = true;
             }
         }
@@ -41,11 +45,62 @@ public final class BotWorker extends Thread {
         return worker.threadNumber;
     }
 
+    private String getRoundedDowntime(long timeDiff) {
+        if (timeDiff < 60) {
+            if (timeDiff > 1) {
+                return timeDiff + " seconds";
+            }
+            return timeDiff + " second";
+        }
+        timeDiff /= 60;
+        if (timeDiff < 60) {
+            if (timeDiff > 1) {
+                return timeDiff + " minutes";
+            }
+            return timeDiff + " minute";
+        }
+        timeDiff /= 60;
+        if (timeDiff < 24) {
+            if (timeDiff > 1) {
+                return timeDiff + " hours";
+            }
+            return timeDiff + " hour";
+        }
+        timeDiff /= 24;
+        if (timeDiff > 1) {
+            return timeDiff + " days";
+        }
+        return timeDiff + " day";
+    }
+
+    private void messageUsersOnDowntimeFailure(List<Message> missedMessages) {
+        for (Message message : missedMessages) {
+            if (message.getDate() > 0) {
+                try {
+                    StringBuilder messageBuilder = new StringBuilder();
+                    String name = JBot.getProperName(message.getFrom());
+                    if (name.isEmpty()) {
+                        messageBuilder.append("Hi. ");
+                    } else {
+                        messageBuilder.append("Hi *").append(name).append("*. ");
+                    }
+                    messageBuilder.append("\nWe regret that the service has been down for *")
+                            .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
+                            .append("* for maintenance.\nWe'll try to make sure that this doesn't happen again.");
+                    bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(), false, ParseMode.Markdown);
+                } catch (IOException e) {
+                    logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
+                }
+            }
+        }
+    }
+
     public void startBotWork() {
         if (defaultModel != null) {
             BotSweeper.startDefaultInstance(defaultModel);
             updateReceiver.onBotStart();
             logger.log(Level.INFO, "Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + defaultModel.getModelClassName());
+            messageUsersOnDowntimeFailure(updateReceiver.getMissedMessageList());
             while (enabled) {
                 try {
                     Update update = updateReceiver.getUpdate();
