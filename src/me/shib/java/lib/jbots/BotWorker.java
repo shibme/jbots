@@ -2,10 +2,7 @@ package me.shib.java.lib.jbots;
 
 
 import me.shib.java.lib.jtelebot.service.TelegramBot;
-import me.shib.java.lib.jtelebot.types.ChatId;
-import me.shib.java.lib.jtelebot.types.Message;
-import me.shib.java.lib.jtelebot.types.ParseMode;
-import me.shib.java.lib.jtelebot.types.Update;
+import me.shib.java.lib.jtelebot.types.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,8 +83,9 @@ public final class BotWorker extends Thread {
                     }
                     messageBuilder.append("\nWe regret that the service has been down for *")
                             .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
-                            .append("* for maintenance.\nWe'll try to make sure that this doesn't happen again.");
-                    bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(), false, ParseMode.Markdown);
+                            .append("* for maintenance.\nWe'll try to make sure this doesn't happen again.");
+                    bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
+                            false, ParseMode.Markdown, false, 0, new ReplyKeyboardHide());
                 } catch (IOException e) {
                     logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
                 }
