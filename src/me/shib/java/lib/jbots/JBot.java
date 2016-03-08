@@ -31,22 +31,22 @@ public abstract class JBot {
         return url;
     }
 
-    private static boolean isValidText(String text) {
-        return text != null && text.matches("^[A-Za-z0-9]+$");
+    private static boolean isValidName(String text) {
+        return text != null && !text.isEmpty();
     }
 
     private static String getProperName(String firstName, String lastName, String username) {
         StringBuilder nameBuilder = new StringBuilder();
-        if (isValidText(firstName)) {
+        if (isValidName(firstName)) {
             nameBuilder.append(firstName);
         }
-        if (isValidText(lastName)) {
+        if (isValidName(lastName)) {
             if (!nameBuilder.toString().isEmpty()) {
                 nameBuilder.append(" ");
             }
             nameBuilder.append(lastName);
         }
-        if (nameBuilder.toString().isEmpty() && isValidText(username)) {
+        if (nameBuilder.toString().isEmpty() && isValidName(username)) {
             nameBuilder.append(username);
         }
         return nameBuilder.toString();
