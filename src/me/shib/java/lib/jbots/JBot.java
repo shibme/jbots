@@ -8,14 +8,14 @@ import java.util.logging.Logger;
 
 public abstract class JBot {
 
-    private static Logger logger = Logger.getLogger(JBot.class.getName());
+    private static final Logger logger = Logger.getLogger(JBot.class.getName());
 
     protected TelegramBot bot;
     protected JBotConfig config;
 
     public JBot(JBotConfig config) {
-        this.bot = BotProvider.getInstance(config);
         this.config = config;
+        this.bot = config.getBot();
     }
 
     public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {

@@ -17,9 +17,8 @@ import java.util.logging.Logger;
 
 public final class DefaultJBot extends JBot {
 
+    private static final Logger logger = Logger.getLogger(DefaultJBot.class.getName());
     private static final Date startTime = new Date();
-
-    private static Logger logger = Logger.getLogger(DefaultJBot.class.getName());
 
     private JBotConfig config;
     private JBot appModel;

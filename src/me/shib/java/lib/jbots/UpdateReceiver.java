@@ -14,8 +14,7 @@ public final class UpdateReceiver {
 
     private static final Logger logger = Logger.getLogger(UpdateReceiver.class.getName());
     private static final int allowRequestsBeforeInterval = 10;
-
-    private static Map<String, UpdateReceiver> updateReceiverMap;
+    private static final Map<String, UpdateReceiver> updateReceiverMap = new HashMap<>();
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
@@ -26,20 +25,17 @@ public final class UpdateReceiver {
     private UpdateReceiver(JBotConfig config) {
         this.startTime = (new Date().getTime() / 1000) - allowRequestsBeforeInterval;
         this.updatesQueue = new LinkedList<>();
-        this.bot = BotProvider.getInstance(config);
         this.botStarted = false;
         this.config = config;
+        this.bot = config.getBot();
     }
 
     protected static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
-        if (updateReceiverMap == null) {
-            updateReceiverMap = new HashMap<>();
-        }
-        String botAPItoken = config.getBotApiToken();
-        UpdateReceiver updateReceiver = updateReceiverMap.get(botAPItoken);
+        String botApiToken = config.getBotApiToken();
+        UpdateReceiver updateReceiver = updateReceiverMap.get(botApiToken);
         if (updateReceiver == null) {
             updateReceiver = new UpdateReceiver(config);
-            updateReceiverMap.put(botAPItoken, updateReceiver);
+            updateReceiverMap.put(botApiToken, updateReceiver);
         }
         return updateReceiver;
     }

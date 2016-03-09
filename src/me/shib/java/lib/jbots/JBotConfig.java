@@ -2,21 +2,24 @@ package me.shib.java.lib.jbots;
 
 import me.shib.java.lib.common.utils.JsonLib;
 import me.shib.java.lib.jbotstats.BotStatsConfig;
+import me.shib.java.lib.jbotstats.JBotStats;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
+import me.shib.java.lib.jtelebot.types.User;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class JBotConfig {
 
-    private static Logger logger = Logger.getLogger(JBotConfig.class.getName());
-    private static JsonLib jsonLib = new JsonLib();
-    private static Map<String, JBotConfig> configMap;
+    private static final Logger logger = Logger.getLogger(JBotConfig.class.getName());
+    private static final JsonLib jsonLib = new JsonLib();
+    private static final Map<String, JBotConfig> configMap = new HashMap<>();
 
     private String botModelClassName;
     private String botApiToken;
@@ -29,6 +32,7 @@ public final class JBotConfig {
     private BotStatsConfig botStatsConfig;
     private Map<String, String> constants;
     private Set<String> userModeSet;
+    private TelegramBot bot;
 
     public JBotConfig(String botApiToken, Class<JBot> botModelClass) {
         this.botModelClassName = botModelClass.getName();
@@ -64,27 +68,21 @@ public final class JBotConfig {
         return configList.toArray(configArray);
     }
 
-    public static void addConfigToList(JBotConfig config) {
-        if (configMap == null) {
-            configMap = new HashMap<>();
-        }
-        configMap.put(config.getBotApiToken(), config);
-    }
-
     public static synchronized void addJSONtoConfigList(String json) {
         if (json != null) {
             JBotConfig[] configArray = jsonLib.fromJson(json, JBotConfig[].class);
             if (configArray != null) {
                 for (JBotConfig configItem : configArray) {
                     if ((configItem.getBotApiToken() != null)
-                            && (!configItem.getBotApiToken().isEmpty())
-                            && isValidClassName(configItem.getBotModelClassName())) {
-                        configItem.initDefaults();
-                        TelegramBot bot = BotProvider.getInstance(configItem);
-                        if (bot != null) {
-                            addConfigToList(configItem);
-                        } else {
-                            logger.log(Level.WARNING, "The bot with API token, \"" + configItem.getBotApiToken() + "\" doesn't seem to work.");
+                            && (!configItem.getBotApiToken().isEmpty())) {
+                        if ((configMap.get(configItem.getBotApiToken()) == null)
+                                && isValidClassName(configItem.getBotModelClassName())) {
+                            configItem.initDefaults();
+                            if (configItem.bot != null) {
+                                configMap.put(configItem.getBotApiToken(), configItem);
+                            } else {
+                                logger.log(Level.WARNING, "The bot with API token, \"" + configItem.getBotApiToken() + "\" doesn't seem to work.");
+                            }
                         }
                     }
                 }
@@ -109,7 +107,6 @@ public final class JBotConfig {
                 addJSONtoConfigList(jsonBuilder.toString());
             } catch (IOException e) {
                 logger.throwing(JBotConfig.class.getName(), "addFileToConfigList", e);
-                e.printStackTrace();
             }
         }
     }
@@ -139,6 +136,33 @@ public final class JBotConfig {
         return this.botStatsConfig;
     }
 
+    public TelegramBot getBot() {
+        return bot;
+    }
+
+    protected synchronized void initBot() {
+        if ((botApiToken != null) && (!botApiToken.isEmpty())) {
+            TelegramBot botService = TelegramBot.getInstance(botApiToken);
+            if (botService != null) {
+                JBotStats jBotStats = null;
+                if (botStatsConfig != null) {
+                    try {
+                        Class<?> clazz = Class.forName(botStatsConfig.getBotStatsClassName());
+                        Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class, User.class);
+                        jBotStats = (JBotStats) ctor.newInstance(botStatsConfig, botService.getIdentity());
+                    } catch (Exception e) {
+                        logger.throwing(this.getClass().getName(), "initBot", e);
+                    }
+                }
+                if (jBotStats != null) {
+                    bot = new AnalyticsBot(botService, jBotStats);
+                } else {
+                    bot = botService;
+                }
+            }
+        }
+    }
+
     private void initDefaults() {
         this.userModeSet = new HashSet<>();
         if (this.reportIntervalInSeconds < 0) {
@@ -150,6 +174,7 @@ public final class JBotConfig {
         if (this.threadCount < 1) {
             this.threadCount = 1;
         }
+        initBot();
     }
 
     public String getConstant(String key) {

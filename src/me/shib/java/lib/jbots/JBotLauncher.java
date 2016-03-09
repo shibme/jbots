@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public final class JBotLauncher {
 
-    private static Logger logger = Logger.getLogger(JBotLauncher.class.getName());
+    private static final Logger logger = Logger.getLogger(JBotLauncher.class.getName());
 
     public static void launchBots(JBotConfig[] configList) {
         if (configList != null) {

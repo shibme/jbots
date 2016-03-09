@@ -11,8 +11,9 @@ import java.util.logging.Logger;
 
 public final class BotWorker extends Thread {
 
+    private static final Logger logger = Logger.getLogger(BotWorker.class.getName());
+
     private static int threadCounter = 0;
-    private static Logger logger = Logger.getLogger(BotWorker.class.getName());
 
     private JBotConfig config;
     private TelegramBot bot;

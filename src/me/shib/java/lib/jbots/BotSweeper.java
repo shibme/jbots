@@ -8,8 +8,7 @@ import java.util.logging.Logger;
 public final class BotSweeper extends Thread {
 
     private static final Logger logger = Logger.getLogger(BotSweeper.class.getName());
-
-    private static Map<String, BotSweeper> tBotSweeperMap;
+    private static final Map<String, BotSweeper> tBotSweeperMap = new HashMap<>();
 
     private DefaultJBot defaultModel;
     private JBotConfig jBotConfig;
@@ -25,9 +24,6 @@ public final class BotSweeper extends Thread {
         String botApiToken = defaultModel.getConfig().getBotApiToken();
         if (botApiToken == null) {
             return null;
-        }
-        if (tBotSweeperMap == null) {
-            tBotSweeperMap = new HashMap<>();
         }
         BotSweeper botSweeper = tBotSweeperMap.get(botApiToken);
         if (botSweeper == null) {
