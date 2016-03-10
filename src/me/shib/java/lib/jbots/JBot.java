@@ -4,18 +4,41 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class JBot {
+public abstract class JBot extends Thread {
 
     private static final Logger logger = Logger.getLogger(JBot.class.getName());
+    private static final Map<String, JBot> botSweeperMap = new HashMap<>();
+
+    private static int threadCounter = 0;
 
     protected TelegramBot bot;
     protected JBotConfig config;
+    private UpdateReceiver updateReceiver;
+    private boolean enabled;
+    private boolean sweeper;
+    private int threadNumber;
 
     public JBot(JBotConfig config) {
         this.config = config;
         this.bot = config.getBot();
+        updateReceiver = UpdateReceiver.getDefaultInstance(config);
+        enabled = true;
+        sweeper = false;
+        threadNumber = 0;
+    }
+
+    private static synchronized int getThisThreadNumber(JBot workerBot) {
+        if (workerBot.threadNumber == 0) {
+            threadCounter++;
+            workerBot.threadNumber = threadCounter;
+        }
+        return workerBot.threadNumber;
     }
 
     public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {
@@ -66,6 +89,57 @@ public abstract class JBot {
         return "";
     }
 
+    private String getRoundedDowntime(long timeDiff) {
+        if (timeDiff < 60) {
+            if (timeDiff > 1) {
+                return timeDiff + " seconds";
+            }
+            return timeDiff + " second";
+        }
+        timeDiff /= 60;
+        if (timeDiff < 60) {
+            if (timeDiff > 1) {
+                return timeDiff + " minutes";
+            }
+            return timeDiff + " minute";
+        }
+        timeDiff /= 60;
+        if (timeDiff < 24) {
+            if (timeDiff > 1) {
+                return timeDiff + " hours";
+            }
+            return timeDiff + " hour";
+        }
+        timeDiff /= 24;
+        if (timeDiff > 1) {
+            return timeDiff + " days";
+        }
+        return timeDiff + " day";
+    }
+
+    private void messageUsersOnDowntimeFailure(List<Message> missedMessages) {
+        for (Message message : missedMessages) {
+            if (message.getDate() > 0) {
+                try {
+                    StringBuilder messageBuilder = new StringBuilder();
+                    String name = JBot.getProperName(message.getFrom());
+                    if (name.isEmpty()) {
+                        messageBuilder.append("Hi. ");
+                    } else {
+                        messageBuilder.append("Hi *").append(name).append("*. ");
+                    }
+                    messageBuilder.append("\nWe regret that the service has been down for *")
+                            .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
+                            .append("* for maintenance.\nWe'll try to make sure this doesn't happen again.");
+                    bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
+                            false, ParseMode.Markdown, false, 0, new ReplyKeyboardHide());
+                } catch (IOException e) {
+                    logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
+                }
+            }
+        }
+    }
+
     public Message forwardToAdmins(Message message) {
         try {
             long[] admins = config.getAdminIdList();
@@ -87,6 +161,82 @@ public abstract class JBot {
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
             return null;
+        }
+    }
+
+    private void sweeperAction() {
+        logger.log(Level.INFO, "Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
+        long intervals = config.getReportIntervalInSeconds() * 1000;
+        long[] adminIdList = config.getAdminIdList();
+        if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
+            while (enabled) {
+                try {
+                    for (long admin : adminIdList) {
+                        sendStatusMessage(admin);
+                    }
+                    Thread.sleep(intervals);
+                } catch (Exception e) {
+                    logger.throwing(this.getClass().getName(), "sweeperAction", e);
+                }
+            }
+        }
+    }
+
+    public synchronized boolean setAsSweeperThread() {
+        JBot existingSweeper = botSweeperMap.get(config.getBotApiToken());
+        if ((existingSweeper == null) || ((!existingSweeper.isAlive()) && (existingSweeper.getState() != State.TERMINATED))) {
+            sweeper = true;
+            botSweeperMap.put(config.getBotApiToken(), this);
+            return true;
+        }
+        return false;
+    }
+
+    protected String getModelClassName() {
+        return getClass().getSimpleName();
+    }
+
+    public void startBot() {
+        logger.log(Level.INFO, "Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + getModelClassName());
+        messageUsersOnDowntimeFailure(updateReceiver.getMissedMessageList());
+        while (enabled) {
+            try {
+                Update update = updateReceiver.getUpdate();
+                if (update.getMessage() != null) {
+                    Message message = update.getMessage();
+                    boolean adminIdValid = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId()));
+                    Message commandResponseMessage = null;
+                    if (config.isValidCommand(message.getText())) {
+                        commandResponseMessage = onCommand(message);
+                    }
+                    Message adminResponseMessage = null;
+                    if ((commandResponseMessage == null) && adminIdValid && (!config.isUserMode(message.getFrom().getId()))) {
+                        adminResponseMessage = onMessageFromAdmin(message);
+                    }
+                    if ((adminResponseMessage == null) && (commandResponseMessage == null)) {
+                        onReceivingMessage(message);
+                    }
+                } else if (update.getInline_query() != null) {
+                    onInlineQuery(update.getInline_query());
+                } else if (update.getChosen_inline_result() != null) {
+                    onChosenInlineResult(update.getChosen_inline_result());
+                }
+            } catch (Exception e) {
+                logger.throwing(this.getClass().getName(), "startBot", e);
+            }
+        }
+    }
+
+    public void stopWorker() {
+        enabled = false;
+    }
+
+    @Override
+    public void run() {
+        if (sweeper) {
+            sweeperAction();
+        } else {
+            startBot();
         }
     }
 

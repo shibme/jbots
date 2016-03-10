@@ -15,11 +15,21 @@ public final class JBotLauncher {
     public static void launchBots(JBotConfig[] configList) {
         if (configList != null) {
             for (JBotConfig conf : configList) {
+                JBot sweeperBot = new DefaultJBot(conf);
+                sweeperBot.setAsSweeperThread();
+                sweeperBot.start();
+                while (!sweeperBot.isAlive()) {
+                    try {
+                        Thread.sleep(0);
+                    } catch (InterruptedException e) {
+                        logger.throwing(JBotLauncher.class.getName(), "launchBots", e);
+                    }
+                }
                 int threadCount = conf.getThreadCount();
-                BotWorker[] workers = new BotWorker[threadCount];
+                JBot[] bots = new DefaultJBot[threadCount];
                 for (int i = 0; i < threadCount; i++) {
-                    workers[i] = new BotWorker(conf);
-                    workers[i].start();
+                    bots[i] = new DefaultJBot(conf);
+                    bots[i].start();
                 }
             }
         }

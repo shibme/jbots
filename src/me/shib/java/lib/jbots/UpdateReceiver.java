@@ -7,7 +7,6 @@ import me.shib.java.lib.jtelebot.types.Update;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class UpdateReceiver {
@@ -19,13 +18,11 @@ public final class UpdateReceiver {
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
     private JBotConfig config;
-    private boolean botStarted;
     private long startTime;
 
     private UpdateReceiver(JBotConfig config) {
         this.startTime = (new Date().getTime() / 1000) - allowRequestsBeforeInterval;
         this.updatesQueue = new LinkedList<>();
-        this.botStarted = false;
         this.config = config;
         this.bot = config.getBot();
     }
@@ -86,13 +83,6 @@ public final class UpdateReceiver {
             update = updatesQueue.poll();
         }
         return update;
-    }
-
-    protected synchronized void onBotStart() {
-        if (!botStarted) {
-            logger.log(Level.INFO, "Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
-            botStarted = true;
-        }
     }
 
 }
