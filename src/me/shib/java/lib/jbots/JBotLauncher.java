@@ -5,6 +5,8 @@ import me.shib.java.lib.rest.client.ServiceResponse;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,24 +15,21 @@ public final class JBotLauncher {
     private static final Logger logger = Logger.getLogger(JBotLauncher.class.getName());
 
     public static void launchBots(JBotConfig[] configList) {
+        List<JBot> jBots = new ArrayList<>();
         if (configList != null) {
             for (JBotConfig conf : configList) {
-                JBot sweeperBot = new DefaultJBot(conf);
-                sweeperBot.setAsSweeperThread();
-                sweeperBot.start();
-                while (!sweeperBot.isAlive()) {
-                    try {
-                        Thread.sleep(0);
-                    } catch (InterruptedException e) {
-                        logger.throwing(JBotLauncher.class.getName(), "launchBots", e);
-                    }
-                }
+                jBots.add(JBot.startSweeper(conf));
                 int threadCount = conf.getThreadCount();
-                JBot[] bots = new DefaultJBot[threadCount];
                 for (int i = 0; i < threadCount; i++) {
-                    bots[i] = new DefaultJBot(conf);
-                    bots[i].start();
+                    jBots.add(JBot.startNewJBot(conf));
                 }
+            }
+        }
+        for (JBot jBot : jBots) {
+            try {
+                jBot.join();
+            } catch (InterruptedException e) {
+                logger.throwing(JBotLauncher.class.getName(), "launchBots", e);
             }
         }
     }

@@ -21,7 +21,7 @@ public abstract class JBot extends Thread {
     protected JBotConfig config;
     private UpdateReceiver updateReceiver;
     private boolean enabled;
-    private boolean sweeper;
+    private boolean sweeperMode;
     private int threadNumber;
 
     public JBot(JBotConfig config) {
@@ -29,16 +29,13 @@ public abstract class JBot extends Thread {
         this.bot = config.getBot();
         updateReceiver = UpdateReceiver.getDefaultInstance(config);
         enabled = true;
-        sweeper = false;
+        sweeperMode = false;
         threadNumber = 0;
     }
 
-    private static synchronized int getThisThreadNumber(JBot workerBot) {
-        if (workerBot.threadNumber == 0) {
-            threadCounter++;
-            workerBot.threadNumber = threadCounter;
-        }
-        return workerBot.threadNumber;
+    private static synchronized int getThreadNumber() {
+        threadCounter++;
+        return threadCounter;
     }
 
     public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {
@@ -87,6 +84,26 @@ public abstract class JBot extends Thread {
             return getProperName(user.getFirst_name(), user.getLast_name(), user.getUsername());
         }
         return "";
+    }
+
+    protected static synchronized JBot startSweeper(JBotConfig config) {
+        JBot sweeper = botSweeperMap.get(config.getBotApiToken());
+        if (sweeper == null) {
+            sweeper = new DefaultJBot(config);
+            sweeper.sweeperMode = true;
+            botSweeperMap.put(config.getBotApiToken(), sweeper);
+            logger.log(Level.INFO, "Starting services for: " + sweeper.bot.getIdentity().getFirst_name() + " (" + sweeper.bot.getIdentity().getUsername() + ")");
+            sweeper.start();
+        }
+        return sweeper;
+    }
+
+    protected static synchronized JBot startNewJBot(JBotConfig config) {
+        JBot jBot = new DefaultJBot(config);
+        jBot.threadNumber = getThreadNumber();
+        logger.log(Level.INFO, "Starting thread " + jBot.threadNumber + " with " + jBot.bot.getIdentity().getUsername() + " using the model: " + jBot.getModelClassName());
+        jBot.start();
+        return jBot;
     }
 
     private String getRoundedDowntime(long timeDiff) {
@@ -165,7 +182,6 @@ public abstract class JBot extends Thread {
     }
 
     private void sweeperAction() {
-        logger.log(Level.INFO, "Starting services for: " + bot.getIdentity().getFirst_name() + " (" + bot.getIdentity().getUsername() + ")");
         long intervals = config.getReportIntervalInSeconds() * 1000;
         long[] adminIdList = config.getAdminIdList();
         if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
@@ -182,22 +198,11 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public synchronized boolean setAsSweeperThread() {
-        JBot existingSweeper = botSweeperMap.get(config.getBotApiToken());
-        if ((existingSweeper == null) || ((!existingSweeper.isAlive()) && (existingSweeper.getState() != State.TERMINATED))) {
-            sweeper = true;
-            botSweeperMap.put(config.getBotApiToken(), this);
-            return true;
-        }
-        return false;
-    }
-
     protected String getModelClassName() {
         return getClass().getSimpleName();
     }
 
     public void startBot() {
-        logger.log(Level.INFO, "Starting thread " + getThisThreadNumber(this) + " with " + bot.getIdentity().getUsername() + " using the model: " + getModelClassName());
         messageUsersOnDowntimeFailure(updateReceiver.getMissedMessageList());
         while (enabled) {
             try {
@@ -233,7 +238,7 @@ public abstract class JBot extends Thread {
 
     @Override
     public void run() {
-        if (sweeper) {
+        if (sweeperMode) {
             sweeperAction();
         } else {
             startBot();
