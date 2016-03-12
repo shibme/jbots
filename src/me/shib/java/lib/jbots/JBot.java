@@ -19,6 +19,8 @@ public abstract class JBot extends Thread {
 
     protected TelegramBot bot;
     protected JBotConfig config;
+    protected String botRatingUrl;
+    protected String botReviewMarkdownMessage;
     private UpdateReceiver updateReceiver;
     private boolean enabled;
     private boolean sweeperMode;
@@ -27,28 +29,18 @@ public abstract class JBot extends Thread {
     public JBot(JBotConfig config) {
         this.config = config;
         this.bot = config.getBot();
-        updateReceiver = UpdateReceiver.getDefaultInstance(config);
-        enabled = true;
-        sweeperMode = false;
-        threadNumber = 0;
+        this.botRatingUrl = "https://telegram.me/storebot?start=" + bot.getIdentity().getUsername();
+        this.botReviewMarkdownMessage = "Please *give me the best possible rating and review* for our work in StoreBot:\n"
+                + this.botRatingUrl;
+        this.updateReceiver = UpdateReceiver.getDefaultInstance(config);
+        this.enabled = true;
+        this.sweeperMode = false;
+        this.threadNumber = 0;
     }
 
     private static synchronized int getThreadNumber() {
         threadCounter++;
         return threadCounter;
-    }
-
-    public static String getAnalyticsRedirectedURL(TelegramBot bot, long user_id, String url) {
-        try {
-            AnalyticsBot analyticsBot = (AnalyticsBot) bot;
-            String analyticsURL = analyticsBot.getAnalyticsRedirectedURL(user_id, url);
-            if (analyticsURL != null) {
-                return analyticsURL;
-            }
-        } catch (Exception e) {
-            logger.throwing(JBot.class.getName(), "getAnalyticsRedirectedURL", e);
-        }
-        return url;
     }
 
     private static boolean isValidName(String text) {
@@ -104,6 +96,19 @@ public abstract class JBot extends Thread {
         logger.log(Level.INFO, "Starting thread " + jBot.threadNumber + " with " + jBot.bot.getIdentity().getUsername() + " using the model: " + jBot.getModelClassName());
         jBot.start();
         return jBot;
+    }
+
+    public String getAnalyticsRedirectedURL(long user_id, String url) {
+        try {
+            AnalyticsBot analyticsBot = (AnalyticsBot) bot;
+            String analyticsURL = analyticsBot.getAnalyticsRedirectedURL(user_id, url);
+            if (analyticsURL != null) {
+                return analyticsURL;
+            }
+        } catch (Exception e) {
+            logger.throwing(this.getClass().getName(), "getAnalyticsRedirectedURL", e);
+        }
+        return url;
     }
 
     private String getRoundedDowntime(long timeDiff) {

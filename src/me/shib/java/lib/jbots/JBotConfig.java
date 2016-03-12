@@ -25,6 +25,7 @@ public final class JBotConfig {
     private String botApiToken;
     private String[] commandList;
     private int threadCount;
+    private int minRatingAllowed;
     private long[] adminIdList;
     private boolean defaultWorkerDisabled;
     private boolean missedChatHandlingDisabled;
@@ -41,6 +42,7 @@ public final class JBotConfig {
         this.botStatsConfig = null;
         this.defaultWorkerDisabled = false;
         this.missedChatHandlingDisabled = false;
+        this.minRatingAllowed = 0;
         initDefaults();
     }
 
@@ -174,6 +176,9 @@ public final class JBotConfig {
         if (this.threadCount < 1) {
             this.threadCount = 1;
         }
+        if ((this.minRatingAllowed < 1) || (this.minRatingAllowed > 4)) {
+            this.minRatingAllowed = 5;
+        }
         initBot();
     }
 
@@ -233,6 +238,10 @@ public final class JBotConfig {
 
     public int getThreadCount() {
         return threadCount;
+    }
+
+    public int getMinRatingAllowed() {
+        return minRatingAllowed;
     }
 
     public String getBotModelClassName() {

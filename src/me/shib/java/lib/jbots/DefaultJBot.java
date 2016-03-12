@@ -8,8 +8,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.Level;
@@ -18,6 +20,7 @@ import java.util.logging.Logger;
 public final class DefaultJBot extends JBot {
 
     private static final Logger logger = Logger.getLogger(DefaultJBot.class.getName());
+    private static final String starEmoji = "%E2%AD%90%EF%B8%8F";
     private static final Date startTime = new Date();
 
     private JBotConfig config;
@@ -33,6 +36,9 @@ public final class DefaultJBot extends JBot {
         } catch (Exception e) {
             logger.throwing(this.getClass().getName(), "DefaultJBot", e);
             appModel = null;
+        }
+        if (appModel != null) {
+            this.botReviewMarkdownMessage = appModel.botReviewMarkdownMessage;
         }
     }
 
@@ -63,6 +69,14 @@ public final class DefaultJBot extends JBot {
         }
     }
 
+    private static String getStars(int count) throws UnsupportedEncodingException {
+        StringBuilder starBuilder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            starBuilder.append(URLDecoder.decode(starEmoji, "UTF-8"));
+        }
+        return starBuilder.toString();
+    }
+
     protected String getModelClassName() {
         if (appModel != null) {
             return appModel.getClass().getSimpleName();
@@ -75,6 +89,9 @@ public final class DefaultJBot extends JBot {
     }
 
     public Message onReceivingMessage(Message message) {
+        if (processIfReview(message)) {
+            return message;
+        }
         Message appModelResponseMessage = null;
         if (appModel != null) {
             appModelResponseMessage = appModel.onReceivingMessage(message);
@@ -88,6 +105,9 @@ public final class DefaultJBot extends JBot {
     }
 
     public Message onMessageFromAdmin(Message message) {
+        if (processIfReview(message)) {
+            return message;
+        }
         Message appModelResponseMessage = null;
         if (appModel != null) {
             appModelResponseMessage = appModel.onMessageFromAdmin(message);
@@ -158,6 +178,38 @@ public final class DefaultJBot extends JBot {
                 false, ParseMode.Markdown);
     }
 
+    private boolean processIfReview(Message message) {
+        try {
+            if ((message.getText() != null) && (message.getText().startsWith(getStars(1)))
+                    && (message.getText().replace(getStars(1), "").isEmpty())) {
+                int minRating = config.getMinRatingAllowed() - 1;
+                String reviewText = message.getText();
+                for (int i = 0; i < minRating; i++) {
+                    reviewText = reviewText.replaceFirst(getStars(1), "");
+                }
+                if (!reviewText.isEmpty()) {
+                    bot.sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage, false,
+                            ParseMode.Markdown, true, 0, new ReplyKeyboardHide());
+                } else {
+                    bot.sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.", false,
+                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide());
+                }
+                return true;
+            }
+        } catch (IOException e) {
+            logger.throwing(this.getClass().getName(), "processIfReview", e);
+        }
+        return false;
+    }
+
+    private Message showReviewMessage(ChatId chatId) throws IOException {
+        String[][] keyboard = new String[][]{{getStars(2), getStars(1)},
+                {getStars(4), getStars(3)},
+                {getStars(5)}};
+        return bot.sendMessage(chatId, "Please give us " + getStars(5) + "and amazing reviews.",
+                false, ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
+    }
+
     public Message onCommand(Message message) {
         Message appModelResponseMessage = null;
         if (appModel != null) {
@@ -180,6 +232,28 @@ public final class DefaultJBot extends JBot {
                 if (config.isValidCommand("/help")) {
                     try {
                         return onStartAndHelp(message);
+                    } catch (IOException e) {
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
+                    }
+                }
+                break;
+            case "/review":
+                if (config.isValidCommand("/review")) {
+                    try {
+                        if (appModel != null) {
+                            return showReviewMessage(new ChatId(message.getChat().getId()));
+                        }
+                    } catch (IOException e) {
+                        logger.throwing(this.getClass().getName(), "onCommand", e);
+                    }
+                }
+                break;
+            case "/rating":
+                if (config.isValidCommand("/rating")) {
+                    try {
+                        if (appModel != null) {
+                            return showReviewMessage(new ChatId(message.getChat().getId()));
+                        }
                     } catch (IOException e) {
                         logger.throwing(this.getClass().getName(), "onCommand", e);
                     }
