@@ -30,8 +30,8 @@ public abstract class JBot extends Thread {
         this.config = config;
         this.bot = config.getBot();
         this.botRatingUrl = "https://telegram.me/storebot?start=" + bot.getIdentity().getUsername();
-        this.botReviewMarkdownMessage = "Please *give me the best possible rating and review* for our work in StoreBot:\n"
-                + this.botRatingUrl;
+        this.botReviewMarkdownMessage = "Please *help us by giving an amazing rating and review*" +
+                " for our work in *StoreBot*:\n" + this.botRatingUrl;
         this.updateReceiver = UpdateReceiver.getDefaultInstance(config);
         this.enabled = true;
         this.sweeperMode = false;

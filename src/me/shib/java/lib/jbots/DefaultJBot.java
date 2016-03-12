@@ -203,10 +203,10 @@ public final class DefaultJBot extends JBot {
     }
 
     private Message showReviewMessage(ChatId chatId) throws IOException {
-        String[][] keyboard = new String[][]{{getStars(2), getStars(1)},
-                {getStars(4), getStars(3)},
+        String[][] keyboard = new String[][]{{getStars(1), getStars(2)},
+                {getStars(3), getStars(4)},
                 {getStars(5)}};
-        return bot.sendMessage(chatId, "Please give us " + getStars(5) + "and amazing reviews.",
+        return bot.sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
                 false, ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
     }
 
