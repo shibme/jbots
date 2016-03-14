@@ -174,7 +174,7 @@ public final class DefaultJBot extends JBot {
         bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
-                        + bot.getIdentity().getUsername() + "). I'll try to serve you the best" + " with all my efforts. Welcome!",
+                        + bot.getIdentity().getUsername() + "). I'll try to serve you the best way I can.\n\n*Welcome!*",
                 false, ParseMode.Markdown);
     }
 
@@ -309,6 +309,18 @@ public final class DefaultJBot extends JBot {
                     }
                 }
                 break;
+        }
+        if (message.getText().startsWith("/start")) {
+            String linkValueText = message.getText().replace("/start", "").trim();
+            if (linkValueText.equalsIgnoreCase("review") || linkValueText.equalsIgnoreCase("rating")) {
+                try {
+                    if (appModel != null) {
+                        return showReviewMessage(new ChatId(message.getChat().getId()));
+                    }
+                } catch (IOException e) {
+                    logger.throwing(this.getClass().getName(), "onCommand", e);
+                }
+            }
         }
         return null;
     }
