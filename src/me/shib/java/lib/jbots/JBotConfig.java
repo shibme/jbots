@@ -20,10 +20,11 @@ public final class JBotConfig {
     private static final Logger logger = Logger.getLogger(JBotConfig.class.getName());
     private static final JsonLib jsonLib = new JsonLib();
     private static final Map<String, JBotConfig> configMap = new HashMap<>();
+    private static final String[] defaultCommands = {"/usermode", "/adminmode"};
 
     private String botModelClassName;
     private String botApiToken;
-    private String[] commandList;
+    private HashSet<String> commandList;
     private int threadCount;
     private int minRatingAllowed;
     private long[] adminIdList;
@@ -113,15 +114,15 @@ public final class JBotConfig {
         }
     }
 
-    public void setCommandList(String[] commandList) {
-        this.commandList = commandList;
+    public void addCommand(String command) {
+        commandList.add(command);
     }
 
-    public boolean isDefaultWorkerDisabled() {
+    protected boolean isDefaultWorkerDisabled() {
         return defaultWorkerDisabled;
     }
 
-    public boolean isMissedChatHandlingDisabled() {
+    protected boolean isMissedChatHandlingDisabled() {
         return missedChatHandlingDisabled;
     }
 
@@ -166,6 +167,10 @@ public final class JBotConfig {
     }
 
     private void initDefaults() {
+        if (commandList == null) {
+            commandList = new HashSet<>();
+        }
+        Collections.addAll(commandList, defaultCommands);
         this.userModeSet = new HashSet<>();
         if (this.reportIntervalInSeconds < 0) {
             this.reportIntervalInSeconds = 0;
@@ -190,19 +195,17 @@ public final class JBotConfig {
         return botApiToken;
     }
 
-    public boolean isValidCommand(String messageText) {
+    public String getValidCommand(String messageText) {
         if ((messageText != null) && (commandList != null)) {
             String[] words = messageText.split("\\s+");
             if (words.length > 0) {
                 String possibleCommand = words[0];
-                for (String command : commandList) {
-                    if (command.equals(possibleCommand)) {
-                        return true;
-                    }
+                if (commandList.contains(possibleCommand)) {
+                    return possibleCommand;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     protected boolean isUserMode(long userId) {

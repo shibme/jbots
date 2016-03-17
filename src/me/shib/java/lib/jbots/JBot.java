@@ -4,6 +4,9 @@ import me.shib.java.lib.jtelebot.service.TelegramBot;
 import me.shib.java.lib.jtelebot.types.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ public abstract class JBot extends Thread {
 
     private static final Logger logger = Logger.getLogger(JBot.class.getName());
     private static final Map<String, JBot> botSweeperMap = new HashMap<>();
+    private static final Date startTime = new Date();
 
     private static int threadCounter = 0;
 
@@ -98,6 +102,33 @@ public abstract class JBot extends Thread {
         return jBot;
     }
 
+    private static String getUpTime() {
+        long start = startTime.getTime();
+        long current = new Date().getTime();
+        long timeDiff = current - start;
+        timeDiff = timeDiff / 1000;
+        int seconds = (int) (timeDiff % 60);
+        timeDiff = timeDiff / 60;
+        int mins = (int) (timeDiff % 60);
+        timeDiff = timeDiff / 60;
+        int hours = (int) (timeDiff % 24);
+        timeDiff = timeDiff / 24;
+        return timeDiff + "d " + hours + "h " + mins + "m " + seconds + "s ";
+    }
+
+    private static String getHostInfo() {
+        InetAddress ip;
+        String hostname;
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+            return hostname + "(" + ip.getHostAddress() + ")";
+        } catch (UnknownHostException e) {
+            logger.throwing(DefaultJBot.class.getName(), "getHostInfo", e);
+            return "Unknown Host";
+        }
+    }
+
     public String getAnalyticsRedirectedURL(long user_id, String url) {
         try {
             AnalyticsBot analyticsBot = (AnalyticsBot) bot;
@@ -162,7 +193,7 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public Message forwardToAdmins(Message message) {
+    public boolean forwardToAdmins(Message message) {
         try {
             long[] admins = config.getAdminIdList();
             if ((admins != null) && (admins.length > 0)) {
@@ -174,16 +205,17 @@ public abstract class JBot extends Thread {
                         logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
                     }
                 }
-                return bot.sendMessage(new ChatId(message.getChat().getId()),
+                bot.sendMessage(new ChatId(message.getChat().getId()),
                         "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
                         false, ParseMode.Markdown, false, message.getMessage_id());
+                return true;
             }
-            return bot.sendMessage(new ChatId(message.getChat().getId()),
+            bot.sendMessage(new ChatId(message.getChat().getId()),
                     "The support team is unavailable. Please try later.", false, null, false, message.getMessage_id());
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
-            return null;
         }
+        return false;
     }
 
     private void sweeperAction() {
@@ -214,17 +246,23 @@ public abstract class JBot extends Thread {
                 Update update = updateReceiver.getUpdate();
                 if (update.getMessage() != null) {
                     Message message = update.getMessage();
-                    boolean adminIdValid = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId()));
-                    Message commandResponseMessage = null;
-                    if (config.isValidCommand(message.getText())) {
-                        commandResponseMessage = onCommand(message);
-                    }
-                    Message adminResponseMessage = null;
-                    if ((commandResponseMessage == null) && adminIdValid && (!config.isUserMode(message.getFrom().getId()))) {
-                        adminResponseMessage = onMessageFromAdmin(message);
-                    }
-                    if ((adminResponseMessage == null) && (commandResponseMessage == null)) {
-                        onReceivingMessage(message);
+                    boolean adminMode = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId())) && (!config.isUserMode(message.getFrom().getId()));
+                    MessageHandler messageHandler = onMessage(message);
+                    if (messageHandler != null) {
+                        String command = config.getValidCommand(message.getText());
+                        if (command != null) {
+                            if (adminMode) {
+                                messageHandler.onCommandFromAdmin(command);
+                            } else {
+                                messageHandler.onCommandFromUser(command);
+                            }
+                        } else {
+                            if (adminMode) {
+                                messageHandler.onMessageFromAdmin();
+                            } else {
+                                messageHandler.onMessageFromUser();
+                            }
+                        }
                     }
                 } else if (update.getInline_query() != null) {
                     onInlineQuery(update.getInline_query());
@@ -237,10 +275,6 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public void stopWorker() {
-        enabled = false;
-    }
-
     @Override
     public void run() {
         if (sweeperMode) {
@@ -250,16 +284,21 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public abstract Message onMessageFromAdmin(Message message);
-
-    public abstract Message onCommand(Message message);
-
-    public abstract Message onReceivingMessage(Message message);
+    public abstract MessageHandler onMessage(Message message);
 
     public abstract boolean onInlineQuery(InlineQuery query);
 
     public abstract boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult);
 
-    public abstract Message sendStatusMessage(long chatId);
+    public void sendStatusMessage(long chatId) {
+        if (!config.isDefaultWorkerDisabled()) {
+            try {
+                bot.sendMessage(new ChatId(chatId),
+                        "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
+            } catch (IOException e) {
+                logger.throwing(this.getClass().getName(), "sendStatusMessage", e);
+            }
+        }
+    }
 
 }

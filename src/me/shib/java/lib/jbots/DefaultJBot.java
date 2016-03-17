@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.net.InetAddress;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +19,6 @@ public final class DefaultJBot extends JBot {
 
     private static final Logger logger = Logger.getLogger(DefaultJBot.class.getName());
     private static final String starEmoji = "%E2%AD%90%EF%B8%8F";
-    private static final Date startTime = new Date();
 
     private JBotConfig config;
     private JBot appModel;
@@ -42,33 +39,6 @@ public final class DefaultJBot extends JBot {
         }
     }
 
-    private static String getUpTime() {
-        long start = startTime.getTime();
-        long current = new Date().getTime();
-        long timeDiff = current - start;
-        timeDiff = timeDiff / 1000;
-        int seconds = (int) (timeDiff % 60);
-        timeDiff = timeDiff / 60;
-        int mins = (int) (timeDiff % 60);
-        timeDiff = timeDiff / 60;
-        int hours = (int) (timeDiff % 24);
-        timeDiff = timeDiff / 24;
-        return timeDiff + "d " + hours + "h " + mins + "m " + seconds + "s ";
-    }
-
-    private static String getHostInfo() {
-        InetAddress ip;
-        String hostname;
-        try {
-            ip = InetAddress.getLocalHost();
-            hostname = ip.getHostName();
-            return hostname + "(" + ip.getHostAddress() + ")";
-        } catch (UnknownHostException e) {
-            logger.throwing(DefaultJBot.class.getName(), "getHostInfo", e);
-            return "Unknown Host";
-        }
-    }
-
     private static String getStars(int count) throws UnsupportedEncodingException {
         StringBuilder starBuilder = new StringBuilder();
         for (int i = 0; i < count; i++) {
@@ -84,67 +54,198 @@ public final class DefaultJBot extends JBot {
         return this.getClass().getSimpleName();
     }
 
-    protected JBotConfig getConfig() {
-        return config;
-    }
-
-    public Message onReceivingMessage(Message message) {
-        if (processIfReview(message)) {
-            return message;
-        }
-        Message appModelResponseMessage = null;
-        if (appModel != null) {
-            appModelResponseMessage = appModel.onReceivingMessage(message);
-        }
-        if (appModelResponseMessage != null) {
-            return appModelResponseMessage;
-        } else if (!config.isDefaultWorkerDisabled()) {
-            return forwardToAdmins(message);
-        }
-        return null;
-    }
-
-    public Message onMessageFromAdmin(Message message) {
-        if (processIfReview(message)) {
-            return message;
-        }
-        Message appModelResponseMessage = null;
-        if (appModel != null) {
-            appModelResponseMessage = appModel.onMessageFromAdmin(message);
-        }
-        if (appModelResponseMessage != null) {
-            return appModelResponseMessage;
-        } else if (!config.isDefaultWorkerDisabled()) {
+    private void invalidMessageResponse(ChatId chatId, boolean appHandled) {
+        if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
             try {
-                long replyToUser = message.getReply_to_message().getForward_from().getId();
-                if (replyToUser > 0) {
-                    if (message.getText() != null) {
-                        return bot.sendMessage(new ChatId(replyToUser), message.getText());
-                    } else if (message.getDocument() != null) {
-                        return bot.sendDocument(new ChatId(replyToUser),
-                                new TelegramFile(message.getDocument().getFile_id()));
-                    } else if (message.getVideo() != null) {
-                        return bot.sendVideo(new ChatId(replyToUser),
-                                new TelegramFile(message.getVideo().getFile_id()));
-                    } else if (message.getPhoto() != null) {
-                        return bot.sendPhoto(new ChatId(replyToUser),
-                                new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
-                    } else if (message.getAudio() != null) {
-                        return bot.sendDocument(new ChatId(replyToUser),
-                                new TelegramFile(message.getDocument().getFile_id()));
-                    } else if (message.getVoice() != null) {
-                        return bot.sendDocument(new ChatId(replyToUser),
-                                new TelegramFile(message.getDocument().getFile_id()));
-                    } else if (message.getSticker() != null) {
-                        return bot.sendDocument(new ChatId(replyToUser),
-                                new TelegramFile(message.getDocument().getFile_id()));
-                    }
-                }
-            } catch (Exception e) {
-                logger.throwing(this.getClass().getName(), "onMessageFromAdmin", e);
+                bot.sendMessage(chatId, "Invalid Message.");
+            } catch (IOException e) {
+                logger.throwing(this.getClass().getName(), "invalidMessageResponse", e);
             }
         }
-        return null;
+    }
+
+    @Override
+    public MessageHandler onMessage(Message message) {
+        if (processIfReview(message)) {
+            return null;
+        }
+
+        abstract class DefaultMessageHandler extends MessageHandler {
+            MessageHandler appMessageHandler;
+
+            DefaultMessageHandler(MessageHandler appMessageHandler, Message message) {
+                super(message);
+                this.appMessageHandler = appMessageHandler;
+            }
+        }
+
+        MessageHandler appMessageHandler = null;
+        if (appModel != null) {
+            appMessageHandler = appModel.onMessage(message);
+        }
+        return new DefaultMessageHandler(appMessageHandler, message) {
+            @Override
+            public boolean onCommandFromAdmin(String command) {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromAdmin(command);
+                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                    switch (command) {
+                        case "/scr":
+                            if (message.getText().equalsIgnoreCase("/scr")) {
+                                try {
+                                    bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
+                                    File screenShotFile = getCurrentScreenShotFile();
+                                    if (screenShotFile != null) {
+                                        bot.sendDocument(new ChatId(message.getChat().getId()),
+                                                new TelegramFile(screenShotFile));
+                                        if (!screenShotFile.delete()) {
+                                            logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
+                                        }
+                                    }
+                                    bot.sendMessage(new ChatId(message.getChat().getId()),
+                                            "I couldn't take a screenshot right now. I'm sorry.");
+                                    return true;
+                                } catch (IOException e) {
+                                    logger.throwing(this.getClass().getName(), "onCommandFromAdmin", e);
+                                }
+                            }
+                            break;
+                        case "/status":
+                            if (message.getText().equalsIgnoreCase("/status")) {
+                                try {
+                                    bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+                                    sendStatusMessage(message.getChat().getId());
+                                    return true;
+                                } catch (IOException e) {
+                                    logger.throwing(this.getClass().getName(), "onCommandFromAdmin", e);
+                                }
+                            }
+                            break;
+                        case "/usermode":
+                            if (message.getText().equalsIgnoreCase("/usermode") && config.isAdmin(message.getChat().getId())) {
+                                config.setUserMode(message.getFrom().getId());
+                                try {
+                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", false, ParseMode.Markdown);
+                                    return true;
+                                } catch (IOException e) {
+                                    logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
+                                }
+                            }
+                            break;
+                    }
+                }
+                invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
+                return appHandled;
+            }
+
+            @Override
+            public boolean onCommandFromUser(String command) {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromUser(command);
+                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                    switch (command) {
+                        case "/start":
+                            if (message.getText().equalsIgnoreCase("/start")) {
+                                try {
+                                    onStartAndHelp(message);
+                                    return true;
+                                } catch (IOException e) {
+                                    logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
+                                }
+                            } else if (message.getText().toLowerCase().startsWith("/start")) {
+                                String linkValueText = message.getText().replace("/start", "").trim();
+                                if (linkValueText.equalsIgnoreCase("review") || linkValueText.equalsIgnoreCase("rating")) {
+                                    return onReviewAndRating(message);
+                                }
+                            }
+                            break;
+                        case "/help":
+                            try {
+                                onStartAndHelp(message);
+                                return true;
+                            } catch (IOException e) {
+                                logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
+                            }
+                            break;
+                        case "/review":
+                            if (onReviewAndRating(message)) {
+                                return true;
+                            }
+                            break;
+                        case "/rating":
+                            if (onReviewAndRating(message)) {
+                                return true;
+                            }
+                            break;
+                        case "/adminmode":
+                            if (message.getText().equalsIgnoreCase("/adminmode") && config.isAdmin(message.getChat().getId())) {
+                                config.setAdminMode(message.getFrom().getId());
+                                try {
+                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", false, ParseMode.Markdown);
+                                    return true;
+                                } catch (IOException e) {
+                                    logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
+                                }
+                            }
+                            break;
+                    }
+                }
+                invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
+                return appHandled;
+            }
+
+            @Override
+            public boolean onMessageFromAdmin() {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onMessageFromAdmin();
+                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                    try {
+                        long replyToUser = message.getReply_to_message().getForward_from().getId();
+                        if (replyToUser > 0) {
+                            if (message.getText() != null) {
+                                bot.sendMessage(new ChatId(replyToUser), message.getText());
+                                return true;
+                            } else if (message.getDocument() != null) {
+                                bot.sendDocument(new ChatId(replyToUser),
+                                        new TelegramFile(message.getDocument().getFile_id()));
+                                return true;
+                            } else if (message.getVideo() != null) {
+                                bot.sendVideo(new ChatId(replyToUser),
+                                        new TelegramFile(message.getVideo().getFile_id()));
+                                return true;
+                            } else if (message.getPhoto() != null) {
+                                bot.sendPhoto(new ChatId(replyToUser),
+                                        new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
+                                return true;
+                            } else if (message.getAudio() != null) {
+                                bot.sendDocument(new ChatId(replyToUser),
+                                        new TelegramFile(message.getDocument().getFile_id()));
+                                return true;
+                            } else if (message.getVoice() != null) {
+                                bot.sendDocument(new ChatId(replyToUser),
+                                        new TelegramFile(message.getDocument().getFile_id()));
+                                return true;
+                            } else if (message.getSticker() != null) {
+                                bot.sendDocument(new ChatId(replyToUser),
+                                        new TelegramFile(message.getDocument().getFile_id()));
+                                return true;
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.throwing(this.getClass().getName(), "onMessageFromAdmin", e);
+                    }
+                }
+                invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
+                return appHandled;
+            }
+
+            @Override
+            public boolean onMessageFromUser() {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onMessageFromUser();
+                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                    return forwardToAdmins(message);
+                }
+                invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
+                return appHandled;
+            }
+        };
     }
 
     private File getCurrentScreenShotFile() {
@@ -178,6 +279,18 @@ public final class DefaultJBot extends JBot {
                 false, ParseMode.Markdown);
     }
 
+    private boolean onReviewAndRating(Message message) {
+        try {
+            if (appModel != null) {
+                showReviewMessage(new ChatId(message.getChat().getId()));
+                return true;
+            }
+        } catch (IOException e) {
+            logger.throwing(this.getClass().getName(), "onReviewAndRating", e);
+        }
+        return false;
+    }
+
     private boolean processIfReview(Message message) {
         try {
             if ((message.getText() != null) && (message.getText().startsWith(getStars(1)))
@@ -202,127 +315,12 @@ public final class DefaultJBot extends JBot {
         return false;
     }
 
-    private Message showReviewMessage(ChatId chatId) throws IOException {
+    private void showReviewMessage(ChatId chatId) throws IOException {
         String[][] keyboard = new String[][]{{getStars(1), getStars(2)},
                 {getStars(3), getStars(4)},
                 {getStars(5)}};
-        return bot.sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
+        bot.sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
                 false, ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
-    }
-
-    public Message onCommand(Message message) {
-        Message appModelResponseMessage = null;
-        if (appModel != null) {
-            appModelResponseMessage = appModel.onCommand(message);
-        }
-        if (appModelResponseMessage != null) {
-            return appModelResponseMessage;
-        }
-        switch (message.getText()) {
-            case "/start":
-                if (config.isValidCommand("/start")) {
-                    try {
-                        return onStartAndHelp(message);
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/help":
-                if (config.isValidCommand("/help")) {
-                    try {
-                        return onStartAndHelp(message);
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/review":
-                if (config.isValidCommand("/review")) {
-                    try {
-                        if (appModel != null) {
-                            return showReviewMessage(new ChatId(message.getChat().getId()));
-                        }
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/rating":
-                if (config.isValidCommand("/rating")) {
-                    try {
-                        if (appModel != null) {
-                            return showReviewMessage(new ChatId(message.getChat().getId()));
-                        }
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/scr":
-                if (config.isValidCommand("/scr") && config.isAdmin(message.getChat().getId())) {
-                    try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
-                        File screenShotFile = getCurrentScreenShotFile();
-                        if (screenShotFile != null) {
-                            Message returnMessage = bot.sendDocument(new ChatId(message.getChat().getId()),
-                                    new TelegramFile(screenShotFile));
-                            if (!screenShotFile.delete()) {
-                                logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
-                            }
-                            return returnMessage;
-                        }
-                        return bot.sendMessage(new ChatId(message.getChat().getId()),
-                                "I couldn't take a screenshot right now. I'm sorry.");
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/status":
-                if (config.isValidCommand("/status") && config.isAdmin(message.getChat().getId())) {
-                    try {
-                        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
-                        return sendStatusMessage(message.getChat().getId());
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/usermode":
-                if (config.isValidCommand("/usermode") && config.isAdmin(message.getChat().getId())) {
-                    config.setUserMode(message.getFrom().getId());
-                    try {
-                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", false, ParseMode.Markdown);
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-            case "/adminmode":
-                if (config.isValidCommand("/adminmode") && config.isAdmin(message.getChat().getId())) {
-                    config.setAdminMode(message.getFrom().getId());
-                    try {
-                        return bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", false, ParseMode.Markdown);
-                    } catch (IOException e) {
-                        logger.throwing(this.getClass().getName(), "onCommand", e);
-                    }
-                }
-                break;
-        }
-        if (message.getText().startsWith("/start")) {
-            String linkValueText = message.getText().replace("/start", "").trim();
-            if (linkValueText.equalsIgnoreCase("review") || linkValueText.equalsIgnoreCase("rating")) {
-                try {
-                    if (appModel != null) {
-                        return showReviewMessage(new ChatId(message.getChat().getId()));
-                    }
-                } catch (IOException e) {
-                    logger.throwing(this.getClass().getName(), "onCommand", e);
-                }
-            }
-        }
-        return null;
     }
 
     @Override
@@ -341,25 +339,6 @@ public final class DefaultJBot extends JBot {
             appModelResponse = appModel.onChosenInlineResult(chosenInlineResult);
         }
         return appModelResponse;
-    }
-
-    @Override
-    public Message sendStatusMessage(long chatId) {
-        Message appModelResponseMessage = null;
-        if (appModel != null) {
-            appModelResponseMessage = appModel.sendStatusMessage(chatId);
-        }
-        if (appModelResponseMessage != null) {
-            return appModelResponseMessage;
-        } else if (!config.isDefaultWorkerDisabled()) {
-            try {
-                return bot.sendMessage(new ChatId(chatId),
-                        "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
-            } catch (IOException e) {
-                logger.throwing(this.getClass().getName(), "sendStatusMessage", e);
-            }
-        }
-        return null;
     }
 
 }
