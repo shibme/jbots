@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-public final class UpdateReceiver {
+final class UpdateReceiver {
 
     private static final Logger logger = Logger.getLogger(UpdateReceiver.class.getName());
     private static final int allowRequestsBeforeInterval = 10;
@@ -27,7 +27,7 @@ public final class UpdateReceiver {
         this.bot = config.getBot();
     }
 
-    protected static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
+    static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
         String botApiToken = config.getBotApiToken();
         UpdateReceiver updateReceiver = updateReceiverMap.get(botApiToken);
         if (updateReceiver == null) {
@@ -37,11 +37,11 @@ public final class UpdateReceiver {
         return updateReceiver;
     }
 
-    protected long getStartTime() {
+    long getStartTime() {
         return startTime;
     }
 
-    protected synchronized List<Message> getMissedMessageList() {
+    synchronized List<Message> getMissedMessageList() {
         List<Message> missedMessages = new ArrayList<>();
         Set<Long> missedChatIds = new HashSet<>();
         if (!config.isMissedChatHandlingDisabled()) {
@@ -76,7 +76,7 @@ public final class UpdateReceiver {
         }
     }
 
-    protected synchronized Update getUpdate() {
+    synchronized Update getUpdate() {
         Update update = updatesQueue.poll();
         while (update == null) {
             fillUpdatesQueue();

@@ -14,7 +14,7 @@ public final class JBotLauncher {
 
     private static final Logger logger = Logger.getLogger(JBotLauncher.class.getName());
 
-    public static void launchBots(JBotConfig[] configList) {
+    private static void launchBots(JBotConfig[] configList) {
         List<JBot> jBots = new ArrayList<>();
         if (configList != null) {
             for (JBotConfig conf : configList) {

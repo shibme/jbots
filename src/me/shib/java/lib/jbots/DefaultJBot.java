@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class DefaultJBot extends JBot {
+final class DefaultJBot extends JBot {
 
     private static final Logger logger = Logger.getLogger(DefaultJBot.class.getName());
     private static final String starEmoji = "%E2%AD%90%EF%B8%8F";
@@ -23,7 +23,7 @@ public final class DefaultJBot extends JBot {
     private JBotConfig config;
     private JBot appModel;
 
-    protected DefaultJBot(JBotConfig config) {
+    DefaultJBot(JBotConfig config) {
         super(config);
         this.config = config;
         try {

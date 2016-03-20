@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AnalyticsBot extends TelegramBot {
+final class AnalyticsBot extends TelegramBot {
 
     private TelegramBot bot;
     private JBotStats jBotStats;
@@ -21,7 +21,7 @@ public final class AnalyticsBot extends TelegramBot {
     private long lastKnownUpdateId;
     private Map<Long, Map<String, String>> analyticsUserURLMap;
 
-    protected AnalyticsBot(TelegramBot bot, JBotStats jBotStats) {
+    AnalyticsBot(TelegramBot bot, JBotStats jBotStats) {
         this.bot = bot;
         this.jBotStats = jBotStats;
         this.analyticsWorker = new AnalyticsWorker(jBotStats);
@@ -29,7 +29,7 @@ public final class AnalyticsBot extends TelegramBot {
         this.analyticsUserURLMap = new HashMap<>();
     }
 
-    protected String getAnalyticsRedirectedURL(long user_id, String url) {
+    String getAnalyticsRedirectedURL(long user_id, String url) {
         Map<String, String> urlMap = analyticsUserURLMap.get(user_id);
         if (urlMap == null) {
             urlMap = new HashMap<>();
