@@ -69,8 +69,7 @@ final class UpdateReceiver {
 
     private synchronized void fillUpdatesQueue() {
         try {
-            Update[] updates = bot.getUpdates();
-            Collections.addAll(updatesQueue, updates);
+            Collections.addAll(updatesQueue, bot.getUpdates());
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "fillUpdatesQueue", e);
         }
@@ -78,7 +77,7 @@ final class UpdateReceiver {
 
     synchronized Update getUpdate() {
         Update update = updatesQueue.poll();
-        while (update == null) {
+        if (update == null) {
             fillUpdatesQueue();
             update = updatesQueue.poll();
         }
