@@ -100,9 +100,10 @@ final class DefaultJBot extends JBot {
                                         if (!screenShotFile.delete()) {
                                             logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
                                         }
+                                    } else {
+                                        bot.sendMessage(new ChatId(message.getChat().getId()),
+                                                "I couldn't take a screenshot right now. I'm sorry.");
                                     }
-                                    bot.sendMessage(new ChatId(message.getChat().getId()),
-                                            "I couldn't take a screenshot right now. I'm sorry.");
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromAdmin", e);
