@@ -1,6 +1,6 @@
 package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.jtelebot.types.Message;
+import me.shib.java.lib.jtelebot.models.updates.Message;
 
 public abstract class MessageHandler {
 

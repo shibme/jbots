@@ -1,7 +1,11 @@
 package me.shib.java.lib.jbots;
 
 
-import me.shib.java.lib.jtelebot.types.*;
+import me.shib.java.lib.jtelebot.models.types.*;
+import me.shib.java.lib.jtelebot.models.updates.CallbackQuery;
+import me.shib.java.lib.jtelebot.models.updates.ChosenInlineResult;
+import me.shib.java.lib.jtelebot.models.updates.InlineQuery;
+import me.shib.java.lib.jtelebot.models.updates.Message;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -96,7 +100,7 @@ final class DefaultJBot extends JBot {
                                     File screenShotFile = getCurrentScreenShotFile();
                                     if (screenShotFile != null) {
                                         bot.sendDocument(new ChatId(message.getChat().getId()),
-                                                new TelegramFile(screenShotFile));
+                                                new InputFile(screenShotFile));
                                         if (!screenShotFile.delete()) {
                                             logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
                                         }
@@ -125,7 +129,7 @@ final class DefaultJBot extends JBot {
                             if (message.getText().equalsIgnoreCase("/usermode") && config.isAdmin(message.getChat().getId())) {
                                 config.setUserMode(message.getFrom().getId());
                                 try {
-                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", false, ParseMode.Markdown);
+                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
@@ -180,7 +184,7 @@ final class DefaultJBot extends JBot {
                             if (message.getText().equalsIgnoreCase("/adminmode") && config.isAdmin(message.getChat().getId())) {
                                 config.setAdminMode(message.getFrom().getId());
                                 try {
-                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", false, ParseMode.Markdown);
+                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
@@ -205,27 +209,27 @@ final class DefaultJBot extends JBot {
                                 return true;
                             } else if (message.getDocument() != null) {
                                 bot.sendDocument(new ChatId(replyToUser),
-                                        new TelegramFile(message.getDocument().getFile_id()));
+                                        new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getVideo() != null) {
                                 bot.sendVideo(new ChatId(replyToUser),
-                                        new TelegramFile(message.getVideo().getFile_id()));
+                                        new InputFile(message.getVideo().getFile_id()));
                                 return true;
                             } else if (message.getPhoto() != null) {
                                 bot.sendPhoto(new ChatId(replyToUser),
-                                        new TelegramFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
+                                        new InputFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
                                 return true;
                             } else if (message.getAudio() != null) {
                                 bot.sendDocument(new ChatId(replyToUser),
-                                        new TelegramFile(message.getDocument().getFile_id()));
+                                        new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getVoice() != null) {
                                 bot.sendDocument(new ChatId(replyToUser),
-                                        new TelegramFile(message.getDocument().getFile_id()));
+                                        new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getSticker() != null) {
                                 bot.sendDocument(new ChatId(replyToUser),
-                                        new TelegramFile(message.getDocument().getFile_id()));
+                                        new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             }
                         }
@@ -277,7 +281,7 @@ final class DefaultJBot extends JBot {
         return bot.sendMessage(new ChatId(message.getChat().getId()),
                 "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
                         + bot.getIdentity().getUsername() + "). I'll try to serve you the best way I can.\n\n*Welcome!*",
-                false, ParseMode.Markdown);
+                ParseMode.Markdown);
     }
 
     private boolean onReviewAndRating(Message message) {
@@ -302,11 +306,11 @@ final class DefaultJBot extends JBot {
                     reviewText = reviewText.replaceFirst(getStars(1), "");
                 }
                 if (!reviewText.isEmpty()) {
-                    bot.sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage, false,
-                            ParseMode.Markdown, true, 0, new ReplyKeyboardHide());
+                    bot.sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage,
+                            ParseMode.Markdown, true, 0, new ReplyKeyboardHide(false));
                 } else {
-                    bot.sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.", false,
-                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide());
+                    bot.sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.",
+                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
                 }
                 return true;
             }
@@ -317,11 +321,11 @@ final class DefaultJBot extends JBot {
     }
 
     private void showReviewMessage(ChatId chatId) throws IOException {
-        String[][] keyboard = new String[][]{{getStars(1), getStars(2)},
-                {getStars(3), getStars(4)},
-                {getStars(5)}};
+        KeyboardButton[][] keyboard = new KeyboardButton[][]{{new KeyboardButton(getStars(1)), new KeyboardButton(getStars(2))},
+                {new KeyboardButton(getStars(3)), new KeyboardButton(getStars(4))},
+                {new KeyboardButton(getStars(5))}};
         bot.sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
-                false, ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
+                ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
     }
 
     @Override
@@ -338,6 +342,15 @@ final class DefaultJBot extends JBot {
         boolean appModelResponse = false;
         if (appModel != null) {
             appModelResponse = appModel.onChosenInlineResult(chosenInlineResult);
+        }
+        return appModelResponse;
+    }
+
+    @Override
+    public boolean onCallbackQuery(CallbackQuery callbackQuery) {
+        boolean appModelResponse = false;
+        if (appModel != null) {
+            appModelResponse = appModel.onCallbackQuery(callbackQuery);
         }
         return appModelResponse;
     }

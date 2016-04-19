@@ -5,7 +5,7 @@
 
     <groupId>me.shib.java.lib</groupId>
     <artifactId>jbots</artifactId>
-    <version>0.6</version>
+    <version>0.7</version>
     <name>JBots</name>
     <description>A java framework for creating Telegram Bots</description>
     <url>https://github.com/shibme/jbots</url>
@@ -148,12 +148,12 @@
         <dependency>
             <groupId>me.shib.java.lib</groupId>
             <artifactId>jbotstats</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </dependency>
         <dependency>
             <groupId>me.shib.java.lib</groupId>
             <artifactId>jtelebot</artifactId>
-            <version>1.0.1</version>
+            <version>2.0</version>
         </dependency>
     </dependencies>
 

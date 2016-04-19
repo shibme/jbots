@@ -1,9 +1,9 @@
 package me.shib.java.lib.jbots;
 
 
+import me.shib.java.lib.jtelebot.models.updates.Message;
+import me.shib.java.lib.jtelebot.models.updates.Update;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
-import me.shib.java.lib.jtelebot.types.Message;
-import me.shib.java.lib.jtelebot.types.Update;
 
 import java.io.IOException;
 import java.util.*;

@@ -1,7 +1,8 @@
 package me.shib.java.lib.jbots;
 
+import me.shib.java.lib.jtelebot.models.types.*;
+import me.shib.java.lib.jtelebot.models.updates.*;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
-import me.shib.java.lib.jtelebot.types.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -185,7 +186,7 @@ public abstract class JBot extends Thread {
                             .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
                             .append("* for maintenance.\nWe'll try to make sure this doesn't happen again.");
                     bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
-                            false, ParseMode.Markdown, false, 0, new ReplyKeyboardHide());
+                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
                 } catch (IOException e) {
                     logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
                 }
@@ -207,11 +208,11 @@ public abstract class JBot extends Thread {
                 }
                 bot.sendMessage(new ChatId(message.getChat().getId()),
                         "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
-                        false, ParseMode.Markdown, false, message.getMessage_id());
+                        ParseMode.Markdown, false, message.getMessage_id());
                 return true;
             }
             bot.sendMessage(new ChatId(message.getChat().getId()),
-                    "The support team is unavailable. Please try later.", false, null, false, message.getMessage_id());
+                    "The support team is unavailable. Please try later.", null, false, message.getMessage_id());
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
         }
@@ -268,6 +269,8 @@ public abstract class JBot extends Thread {
                     onInlineQuery(update.getInline_query());
                 } else if (update.getChosen_inline_result() != null) {
                     onChosenInlineResult(update.getChosen_inline_result());
+                } else if (update.getCallback_query() != null) {
+                    onCallbackQuery(update.getCallback_query());
                 }
             } catch (Exception e) {
                 logger.throwing(this.getClass().getName(), "startBot", e);
@@ -289,6 +292,8 @@ public abstract class JBot extends Thread {
     public abstract boolean onInlineQuery(InlineQuery query);
 
     public abstract boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult);
+
+    public abstract boolean onCallbackQuery(CallbackQuery callbackQuery);
 
     public void sendStatusMessage(long chatId) {
         if (!config.isDefaultWorkerDisabled()) {

@@ -12,7 +12,7 @@ Add to your `pom.xml`
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.5.4</version>
+	<version>0.7</version>
 </dependency>
 ```
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
@@ -69,12 +69,9 @@ public class YourModelClassName extends JBotModel {
     }
 
     @Override
-    public Message sendStatusMessage(long chatId) {
-        try {
-            return getBot().sendMessage(new ChatId(chatId), getBot().getIdentity().getUsername() + " is running fine!");
-        } catch (IOException e) {
-            return null;
-        }
+    public boolean onCallbackQuery(CallbackQuery callbackQuery) {
+        System.out.println(callbackQuery);
+        return true;
     }
 }
 ```
