@@ -89,8 +89,8 @@ final class DefaultJBot extends JBot {
         }
         return new DefaultMessageHandler(appMessageHandler, message) {
             @Override
-            public boolean onCommandFromAdmin(String command) {
-                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromAdmin(command);
+            public boolean onCommandFromAdmin(String command, String argument) {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromAdmin(command, argument);
                 if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
                     switch (command) {
                         case "/scr":
@@ -136,6 +136,8 @@ final class DefaultJBot extends JBot {
                                 }
                             }
                             break;
+                        default:
+                            return onMessageFromAdmin();
                     }
                 }
                 invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
@@ -143,22 +145,21 @@ final class DefaultJBot extends JBot {
             }
 
             @Override
-            public boolean onCommandFromUser(String command) {
-                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromUser(command);
+            public boolean onCommandFromUser(String command, String argument) {
+                boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromUser(command, argument);
                 if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
                     switch (command) {
                         case "/start":
-                            if (message.getText().equalsIgnoreCase("/start")) {
+                            if (argument != null) {
+                                if (argument.equalsIgnoreCase("review") || argument.equalsIgnoreCase("rating")) {
+                                    return onReviewAndRating(message);
+                                }
+                            } else {
                                 try {
                                     onStartAndHelp(message);
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
-                                }
-                            } else if (message.getText().toLowerCase().startsWith("/start")) {
-                                String linkValueText = message.getText().replace("/start", "").trim();
-                                if (linkValueText.equalsIgnoreCase("review") || linkValueText.equalsIgnoreCase("rating")) {
-                                    return onReviewAndRating(message);
                                 }
                             }
                             break;
@@ -191,6 +192,8 @@ final class DefaultJBot extends JBot {
                                 }
                             }
                             break;
+                        default:
+                            return onMessageFromUser();
                     }
                 }
                 invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);

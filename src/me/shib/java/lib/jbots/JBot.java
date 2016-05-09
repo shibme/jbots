@@ -236,6 +236,24 @@ public abstract class JBot extends Thread {
         }
     }
 
+    private String getCommand(String text) {
+        if (text != null) {
+            String[] words = text.split("\\s+");
+            if (words.length > 0) {
+                String command = words[0];
+                if (command.startsWith("/")) {
+                    return command;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getCommandArgument(String command, String text) {
+        String commandArgument = text.replaceFirst(command, "");
+        return commandArgument.trim();
+    }
+
     protected String getModelClassName() {
         return getClass().getSimpleName();
     }
@@ -250,12 +268,12 @@ public abstract class JBot extends Thread {
                     boolean adminMode = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId())) && (!config.isUserMode(message.getFrom().getId()));
                     MessageHandler messageHandler = onMessage(message);
                     if (messageHandler != null) {
-                        String command = config.getValidCommand(message.getText());
+                        String command = getCommand(message.getText());
                         if (command != null) {
                             if (adminMode) {
-                                messageHandler.onCommandFromAdmin(command);
+                                messageHandler.onCommandFromAdmin(command, getCommandArgument(command, message.getText()));
                             } else {
-                                messageHandler.onCommandFromUser(command);
+                                messageHandler.onCommandFromUser(command, getCommandArgument(command, message.getText()));
                             }
                         } else {
                             if (adminMode) {

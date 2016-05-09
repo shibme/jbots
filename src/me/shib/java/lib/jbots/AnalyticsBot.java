@@ -9,7 +9,7 @@ import me.shib.java.lib.jtelebot.models.types.*;
 import me.shib.java.lib.jtelebot.models.updates.Message;
 import me.shib.java.lib.jtelebot.models.updates.Update;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
-import me.shib.java.lib.rest.client.HTTPFileDownloader;
+import me.shib.java.lib.restiny.HTTPFileDownloader;
 
 import java.io.File;
 import java.io.IOException;

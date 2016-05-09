@@ -20,11 +20,9 @@ public final class JBotConfig {
     private static final Logger logger = Logger.getLogger(JBotConfig.class.getName());
     private static final JsonLib jsonLib = new JsonLib();
     private static final Map<String, JBotConfig> configMap = new HashMap<>();
-    private static final String[] defaultCommands = {"/usermode", "/adminmode"};
 
     private String botModelClassName;
     private String botApiToken;
-    private HashSet<String> commandList;
     private int threadCount;
     private int minRatingAllowed;
     private long[] adminIdList;
@@ -114,10 +112,6 @@ public final class JBotConfig {
         }
     }
 
-    public void addCommand(String command) {
-        commandList.add(command);
-    }
-
     protected boolean isDefaultWorkerDisabled() {
         return defaultWorkerDisabled;
     }
@@ -167,10 +161,6 @@ public final class JBotConfig {
     }
 
     private void initDefaults() {
-        if (commandList == null) {
-            commandList = new HashSet<>();
-        }
-        Collections.addAll(commandList, defaultCommands);
         this.userModeSet = new HashSet<>();
         if (this.reportIntervalInSeconds < 0) {
             this.reportIntervalInSeconds = 0;
@@ -193,19 +183,6 @@ public final class JBotConfig {
 
     public String getBotApiToken() {
         return botApiToken;
-    }
-
-    public String getValidCommand(String messageText) {
-        if ((messageText != null) && (commandList != null)) {
-            String[] words = messageText.split("\\s+");
-            if (words.length > 0) {
-                String possibleCommand = words[0];
-                if (commandList.contains(possibleCommand)) {
-                    return possibleCommand;
-                }
-            }
-        }
-        return null;
     }
 
     protected boolean isUserMode(long userId) {

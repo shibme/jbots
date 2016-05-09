@@ -1,7 +1,8 @@
 package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.rest.client.ServiceAdapter;
-import me.shib.java.lib.rest.client.ServiceResponse;
+import me.shib.java.lib.restiny.RESTinyClient;
+import me.shib.java.lib.restiny.Response;
+import me.shib.java.lib.restiny.requests.GET;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +44,8 @@ public final class JBotLauncher {
                 } else {
                     String configJson = null;
                     try {
-                        ServiceAdapter adapter = new ServiceAdapter(args[0]);
-                        ServiceResponse response = adapter.get(null);
+                        RESTinyClient resTinyClient = new RESTinyClient(args[0]);
+                        Response response = resTinyClient.call(new GET(null));
                         if (response.getStatusCode() == 200) {
                             configJson = response.getResponse();
                         }

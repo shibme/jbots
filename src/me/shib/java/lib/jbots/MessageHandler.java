@@ -10,9 +10,9 @@ public abstract class MessageHandler {
         this.message = message;
     }
 
-    public abstract boolean onCommandFromAdmin(String command);
+    public abstract boolean onCommandFromAdmin(String command, String argument);
 
-    public abstract boolean onCommandFromUser(String command);
+    public abstract boolean onCommandFromUser(String command, String argument);
 
     public abstract boolean onMessageFromAdmin();
 
