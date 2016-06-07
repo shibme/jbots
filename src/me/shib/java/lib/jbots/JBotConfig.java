@@ -1,6 +1,5 @@
 package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.common.utils.JsonLib;
 import me.shib.java.lib.jbotstats.BotStatsConfig;
 import me.shib.java.lib.jbotstats.JBotStats;
 import me.shib.java.lib.jtelebot.models.types.User;
