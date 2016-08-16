@@ -31,7 +31,7 @@ final class DefaultJBot extends JBot {
         super(config);
         this.config = config;
         try {
-            Class<?> clazz = Class.forName(config.getBotModelClassName());
+            Class<?> clazz = Class.forName(config.botModelClass().getName());
             Constructor<?> ctor = clazz.getConstructor(JBotConfig.class);
             appModel = (JBot) ctor.newInstance(config);
         } catch (Exception e) {
@@ -58,8 +58,15 @@ final class DefaultJBot extends JBot {
         return this.getClass().getSimpleName();
     }
 
+    @Override
+    public void onMessage(Message message) {
+        if (appModel != null) {
+            appModel.onMessage(message);
+        }
+    }
+
     private void invalidMessageResponse(ChatId chatId, boolean appHandled) {
-        if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+        if ((!appHandled) && (config.defaultWorker())) {
             try {
                 bot.sendMessage(chatId, "Invalid Message.");
             } catch (IOException e) {
@@ -69,7 +76,7 @@ final class DefaultJBot extends JBot {
     }
 
     @Override
-    public MessageHandler onMessage(Message message) {
+    public MessageHandler handledMessage(Message message) {
         if (processIfReview(message)) {
             return null;
         }
@@ -85,13 +92,13 @@ final class DefaultJBot extends JBot {
 
         MessageHandler appMessageHandler = null;
         if (appModel != null) {
-            appMessageHandler = appModel.onMessage(message);
+            appMessageHandler = appModel.handledMessage(message);
         }
         return new DefaultMessageHandler(appMessageHandler, message) {
             @Override
             public boolean onCommandFromAdmin(String command, String argument) {
                 boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromAdmin(command, argument);
-                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                if ((!appHandled) && (config.defaultWorker())) {
                     switch (command) {
                         case "/scr":
                             if (message.getText().equalsIgnoreCase("/scr")) {
@@ -147,7 +154,7 @@ final class DefaultJBot extends JBot {
             @Override
             public boolean onCommandFromUser(String command, String argument) {
                 boolean appHandled = (appMessageHandler != null) && appMessageHandler.onCommandFromUser(command, argument);
-                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                if ((!appHandled) && (config.defaultWorker())) {
                     switch (command) {
                         case "/start":
                             if (argument != null) {
@@ -203,7 +210,7 @@ final class DefaultJBot extends JBot {
             @Override
             public boolean onMessageFromAdmin() {
                 boolean appHandled = (appMessageHandler != null) && appMessageHandler.onMessageFromAdmin();
-                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                if ((!appHandled) && (config.defaultWorker())) {
                     try {
                         long replyToUser = message.getReply_to_message().getForward_from().getId();
                         if (replyToUser > 0) {
@@ -247,7 +254,7 @@ final class DefaultJBot extends JBot {
             @Override
             public boolean onMessageFromUser() {
                 boolean appHandled = (appMessageHandler != null) && appMessageHandler.onMessageFromUser();
-                if ((!appHandled) && (!config.isDefaultWorkerDisabled())) {
+                if ((!appHandled) && (config.defaultWorker())) {
                     return forwardToAdmins(message);
                 }
                 invalidMessageResponse(new ChatId(message.getChat().getId()), appHandled);
@@ -303,7 +310,7 @@ final class DefaultJBot extends JBot {
         try {
             if ((message.getText() != null) && (message.getText().startsWith(getStars(1)))
                     && (message.getText().replace(getStars(1), "").isEmpty())) {
-                int minRating = config.getMinRatingAllowed() - 1;
+                int minRating = config.minimumAllowedRating() - 1;
                 String reviewText = message.getText();
                 for (int i = 0; i < minRating; i++) {
                     reviewText = reviewText.replaceFirst(getStars(1), "");
@@ -332,30 +339,27 @@ final class DefaultJBot extends JBot {
     }
 
     @Override
-    public boolean onInlineQuery(InlineQuery query) {
+    public void onInlineQuery(InlineQuery query) {
         boolean appModelResponse = false;
         if (appModel != null) {
-            appModelResponse = appModel.onInlineQuery(query);
+            appModel.onInlineQuery(query);
         }
-        return appModelResponse;
     }
 
     @Override
-    public boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
+    public void onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
         boolean appModelResponse = false;
         if (appModel != null) {
-            appModelResponse = appModel.onChosenInlineResult(chosenInlineResult);
+            appModel.onChosenInlineResult(chosenInlineResult);
         }
-        return appModelResponse;
     }
 
     @Override
-    public boolean onCallbackQuery(CallbackQuery callbackQuery) {
+    public void onCallbackQuery(CallbackQuery callbackQuery) {
         boolean appModelResponse = false;
         if (appModel != null) {
-            appModelResponse = appModel.onCallbackQuery(callbackQuery);
+            appModel.onCallbackQuery(callbackQuery);
         }
-        return appModelResponse;
     }
 
 }

@@ -1,16 +1,15 @@
 package me.shib.java.lib.jbots;
 
+import me.shib.java.lib.jbotstats.AnalyticsBot;
 import me.shib.java.lib.jtelebot.models.types.*;
 import me.shib.java.lib.jtelebot.models.updates.*;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
+import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +18,7 @@ public abstract class JBot extends Thread {
     private static final Logger logger = Logger.getLogger(JBot.class.getName());
     private static final Map<String, JBot> botSweeperMap = new HashMap<>();
     private static final Date startTime = new Date();
+    private static final Reflections reflections = new Reflections("");
 
     private static int threadCounter = 0;
 
@@ -41,6 +41,11 @@ public abstract class JBot extends Thread {
         this.enabled = true;
         this.sweeperMode = false;
         this.threadNumber = 0;
+    }
+
+    public static Class[] getAllSubTypes() {
+        Set<Class<? extends JBot>> subTypes = reflections.getSubTypesOf(JBot.class);
+        return subTypes.toArray(new Class[subTypes.size()]);
     }
 
     private static synchronized int getThreadNumber() {
@@ -84,11 +89,11 @@ public abstract class JBot extends Thread {
     }
 
     protected static synchronized JBot startSweeper(JBotConfig config) {
-        JBot sweeper = botSweeperMap.get(config.getBotApiToken());
+        JBot sweeper = botSweeperMap.get(config.botApiToken());
         if (sweeper == null) {
             sweeper = new DefaultJBot(config);
             sweeper.sweeperMode = true;
-            botSweeperMap.put(config.getBotApiToken(), sweeper);
+            botSweeperMap.put(config.botApiToken(), sweeper);
             logger.log(Level.INFO, "Starting services for: " + sweeper.bot.getIdentity().getFirst_name() + " (" + sweeper.bot.getIdentity().getUsername() + ")");
             sweeper.start();
         }
@@ -196,7 +201,7 @@ public abstract class JBot extends Thread {
 
     public boolean forwardToAdmins(Message message) {
         try {
-            long[] admins = config.getAdminIdList();
+            long[] admins = config.admins();
             if ((admins != null) && (admins.length > 0)) {
                 for (long admin : admins) {
                     try {
@@ -220,8 +225,8 @@ public abstract class JBot extends Thread {
     }
 
     private void sweeperAction() {
-        long intervals = config.getReportIntervalInSeconds() * 1000;
-        long[] adminIdList = config.getAdminIdList();
+        long intervals = config.reportInterval() * 1000;
+        long[] adminIdList = config.admins();
         if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
             while (enabled) {
                 try {
@@ -266,7 +271,7 @@ public abstract class JBot extends Thread {
                 if (update.getMessage() != null) {
                     Message message = update.getMessage();
                     boolean adminMode = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId())) && (!config.isUserMode(message.getFrom().getId()));
-                    MessageHandler messageHandler = onMessage(message);
+                    MessageHandler messageHandler = handledMessage(message);
                     if (messageHandler != null) {
                         String command = getCommand(message.getText());
                         if (command != null) {
@@ -282,6 +287,8 @@ public abstract class JBot extends Thread {
                                 messageHandler.onMessageFromUser();
                             }
                         }
+                    } else {
+                        onMessage(message);
                     }
                 } else if (update.getInline_query() != null) {
                     onInlineQuery(update.getInline_query());
@@ -305,16 +312,20 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public abstract MessageHandler onMessage(Message message);
+    public abstract void onMessage(Message message);
 
-    public abstract boolean onInlineQuery(InlineQuery query);
+    public abstract void onInlineQuery(InlineQuery query);
 
-    public abstract boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult);
+    public abstract void onChosenInlineResult(ChosenInlineResult chosenInlineResult);
 
-    public abstract boolean onCallbackQuery(CallbackQuery callbackQuery);
+    public abstract void onCallbackQuery(CallbackQuery callbackQuery);
+
+    public MessageHandler handledMessage(Message message) {
+        return null;
+    }
 
     public void sendStatusMessage(long chatId) {
-        if (!config.isDefaultWorkerDisabled()) {
+        if (config.defaultWorker()) {
             try {
                 bot.sendMessage(new ChatId(chatId),
                         "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());

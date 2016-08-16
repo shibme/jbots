@@ -17,18 +17,18 @@ final class UpdateReceiver {
 
     private Queue<Update> updatesQueue;
     private TelegramBot bot;
-    private JBotConfig config;
+    private boolean missedChatHandlerEnabled;
     private long startTime;
 
     private UpdateReceiver(JBotConfig config) {
         this.startTime = (new Date().getTime() / 1000) - allowRequestsBeforeInterval;
         this.updatesQueue = new LinkedList<>();
-        this.config = config;
+        this.missedChatHandlerEnabled = config.handleMissedChats();
         this.bot = config.getBot();
     }
 
     static synchronized UpdateReceiver getDefaultInstance(JBotConfig config) {
-        String botApiToken = config.getBotApiToken();
+        String botApiToken = config.botApiToken();
         UpdateReceiver updateReceiver = updateReceiverMap.get(botApiToken);
         if (updateReceiver == null) {
             updateReceiver = new UpdateReceiver(config);
@@ -44,7 +44,7 @@ final class UpdateReceiver {
     synchronized List<Message> getMissedMessageList() {
         List<Message> missedMessages = new ArrayList<>();
         Set<Long> missedChatIds = new HashSet<>();
-        if (!config.isMissedChatHandlingDisabled()) {
+        if (missedChatHandlerEnabled) {
             try {
                 Update[] updates = bot.getUpdatesImmediately();
                 while ((updates != null) && (updates.length > 0)) {

@@ -1,14 +1,7 @@
 package me.shib.java.lib.jbots;
 
-import me.shib.java.lib.restiny.RESTinyClient;
-import me.shib.java.lib.restiny.Response;
-import me.shib.java.lib.restiny.requests.GET;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class JBotLauncher {
@@ -20,7 +13,7 @@ public final class JBotLauncher {
         if (configList != null) {
             for (JBotConfig conf : configList) {
                 jBots.add(JBot.startSweeper(conf));
-                int threadCount = conf.getThreadCount();
+                int threadCount = conf.threadCount();
                 for (int i = 0; i < threadCount; i++) {
                     jBots.add(JBot.startNewJBot(conf));
                 }
@@ -36,31 +29,7 @@ public final class JBotLauncher {
     }
 
     public static void main(String[] args) {
-        if (args.length <= 1) {
-            if (args.length == 1) {
-                File possibleConfigFile = new File(args[0]);
-                if (possibleConfigFile.exists()) {
-                    JBotConfig.addFileToConfigList(possibleConfigFile);
-                } else {
-                    String configJson = null;
-                    try {
-                        RESTinyClient resTinyClient = new RESTinyClient(args[0]);
-                        Response response = resTinyClient.call(new GET(null));
-                        if (response.getStatusCode() == 200) {
-                            configJson = response.getResponse();
-                        }
-                    } catch (IOException e) {
-                        logger.throwing(JBotLauncher.class.getName(), "sendStatusMessage", e);
-                    }
-                    JBotConfig.addJSONtoConfigList(configJson);
-                }
-            } else {
-                JBotConfig.addFileToConfigList(new File("jbots-config.json"));
-            }
-            JBotConfig[] configList = JBotConfig.getAllConfigList();
-            launchBots(configList);
-        } else {
-            logger.log(Level.SEVERE, "Please provide valid arguments");
-        }
+        JBotConfig[] configList = JBotConfig.getAllConfigList();
+        launchBots(configList);
     }
 }
