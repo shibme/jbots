@@ -58,13 +58,6 @@ final class DefaultJBot extends JBot {
         return this.getClass().getSimpleName();
     }
 
-    @Override
-    public void onMessage(Message message) {
-        if (appModel != null) {
-            appModel.onMessage(message);
-        }
-    }
-
     private void invalidMessageResponse(ChatId chatId, boolean appHandled) {
         if ((!appHandled) && (config.defaultWorker())) {
             try {
@@ -76,7 +69,7 @@ final class DefaultJBot extends JBot {
     }
 
     @Override
-    public MessageHandler handledMessage(Message message) {
+    public MessageHandler onMessage(Message message) {
         if (processIfReview(message)) {
             return null;
         }
@@ -92,7 +85,7 @@ final class DefaultJBot extends JBot {
 
         MessageHandler appMessageHandler = null;
         if (appModel != null) {
-            appMessageHandler = appModel.handledMessage(message);
+            appMessageHandler = appModel.onMessage(message);
         }
         return new DefaultMessageHandler(appMessageHandler, message) {
             @Override
@@ -340,7 +333,6 @@ final class DefaultJBot extends JBot {
 
     @Override
     public void onInlineQuery(InlineQuery query) {
-        boolean appModelResponse = false;
         if (appModel != null) {
             appModel.onInlineQuery(query);
         }
@@ -348,7 +340,6 @@ final class DefaultJBot extends JBot {
 
     @Override
     public void onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
-        boolean appModelResponse = false;
         if (appModel != null) {
             appModel.onChosenInlineResult(chosenInlineResult);
         }
@@ -356,7 +347,6 @@ final class DefaultJBot extends JBot {
 
     @Override
     public void onCallbackQuery(CallbackQuery callbackQuery) {
-        boolean appModelResponse = false;
         if (appModel != null) {
             appModel.onCallbackQuery(callbackQuery);
         }

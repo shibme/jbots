@@ -271,7 +271,7 @@ public abstract class JBot extends Thread {
                 if (update.getMessage() != null) {
                     Message message = update.getMessage();
                     boolean adminMode = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId())) && (!config.isUserMode(message.getFrom().getId()));
-                    MessageHandler messageHandler = handledMessage(message);
+                    MessageHandler messageHandler = onMessage(message);
                     if (messageHandler != null) {
                         String command = getCommand(message.getText());
                         if (command != null) {
@@ -312,17 +312,13 @@ public abstract class JBot extends Thread {
         }
     }
 
-    public abstract void onMessage(Message message);
+    public abstract MessageHandler onMessage(Message message);
 
     public abstract void onInlineQuery(InlineQuery query);
 
     public abstract void onChosenInlineResult(ChosenInlineResult chosenInlineResult);
 
     public abstract void onCallbackQuery(CallbackQuery callbackQuery);
-
-    public MessageHandler handledMessage(Message message) {
-        return null;
-    }
 
     public void sendStatusMessage(long chatId) {
         if (config.defaultWorker()) {

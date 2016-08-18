@@ -25,34 +25,6 @@ public abstract class JBotConfig {
     private Set<String> userModeSet;
     private TelegramBot bot;
 
-    public JBotConfig() {
-        this.userModeSet = new HashSet<>();
-        initBot();
-    }
-
-    protected synchronized void initBot() {
-        if ((botApiToken() != null) && (!botApiToken().isEmpty())) {
-            TelegramBot botService = TelegramBot.getInstance(botApiToken());
-            if (botService != null) {
-                JBotStats jBotStats = null;
-                if (botStatsConfig() != null) {
-                    try {
-                        Class<?> clazz = Class.forName(botStatsConfig().getBotStatsClass().getName());
-                        Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class, User.class);
-                        jBotStats = (JBotStats) ctor.newInstance(botStatsConfig(), botService.getIdentity());
-                    } catch (Exception e) {
-                        logger.throwing(this.getClass().getName(), "initBot", e);
-                    }
-                }
-                if (jBotStats != null) {
-                    bot = new AnalyticsBot(botService, jBotStats);
-                } else {
-                    bot = botService;
-                }
-            }
-        }
-    }
-
     public abstract String botApiToken();
 
     public abstract Class<JBot> botModelClass();
@@ -77,11 +49,11 @@ public abstract class JBotConfig {
         return true;
     }
 
-    public long[] admins() {
+    protected long[] admins() {
         return new long[0];
     }
 
-    public HashMap<String, String> constants() {
+    protected HashMap<String, String> constants() {
         return new HashMap<>();
     }
 
@@ -89,19 +61,28 @@ public abstract class JBotConfig {
         return null;
     }
 
-    private static boolean isValidClassName(String className) {
-        if (className == null) {
-            return true;
-        }
-        try {
-            if (!className.isEmpty()) {
-                Class.forName(className);
-                return true;
+    public JBotConfig() {
+        this.userModeSet = new HashSet<>();
+        if ((botApiToken() != null) && (!botApiToken().isEmpty())) {
+            TelegramBot botService = TelegramBot.getInstance(botApiToken());
+            if (botService != null) {
+                JBotStats jBotStats = null;
+                if (botStatsConfig() != null) {
+                    try {
+                        Class<?> clazz = Class.forName(botStatsConfig().getBotStatsClass().getName());
+                        Constructor<?> ctor = clazz.getConstructor(BotStatsConfig.class, User.class);
+                        jBotStats = (JBotStats) ctor.newInstance(botStatsConfig(), botService.getIdentity());
+                    } catch (Exception e) {
+                        logger.throwing(this.getClass().getName(), "JBotConfig", e);
+                    }
+                }
+                if (jBotStats != null) {
+                    bot = new AnalyticsBot(botService, jBotStats);
+                } else {
+                    bot = botService;
+                }
             }
-        } catch (ClassNotFoundException e) {
-            logger.throwing(JBotConfig.class.getName(), "isValidClassName", e);
         }
-        return false;
     }
 
     public static synchronized JBotConfig[] getAllConfigList() {
@@ -121,15 +102,6 @@ public abstract class JBotConfig {
         ArrayList<JBotConfig> configList = new ArrayList<>(configMap.values());
         JBotConfig[] configArray = new JBotConfig[configList.size()];
         return configList.toArray(configArray);
-    }
-
-    private boolean doesStringExistInList(String str, ArrayList<String> list) {
-        for (String item : list) {
-            if (item.equals(str)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public TelegramBot getBot() {
