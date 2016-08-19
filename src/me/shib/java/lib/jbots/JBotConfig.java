@@ -27,7 +27,7 @@ public abstract class JBotConfig {
 
     public abstract String botApiToken();
 
-    public abstract Class<JBot> botModelClass();
+    public abstract Class<? extends JBot> botModelClass();
 
     public int threadCount() {
         return 1;
@@ -85,7 +85,7 @@ public abstract class JBotConfig {
         }
     }
 
-    public static synchronized JBotConfig[] getAllConfigList() {
+    protected static synchronized JBotConfig[] getAllConfigList() {
         Class[] configClasses = getAllSubTypes();
         for (Class configClass : configClasses) {
             try {

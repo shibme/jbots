@@ -9,7 +9,10 @@ import org.reflections.Reflections;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,11 +44,6 @@ public abstract class JBot extends Thread {
         this.enabled = true;
         this.sweeperMode = false;
         this.threadNumber = 0;
-    }
-
-    public static Class[] getAllSubTypes() {
-        Set<Class<? extends JBot>> subTypes = reflections.getSubTypesOf(JBot.class);
-        return subTypes.toArray(new Class[subTypes.size()]);
     }
 
     private static synchronized int getThreadNumber() {
