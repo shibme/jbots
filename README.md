@@ -18,60 +18,71 @@ Add to your `pom.xml`
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
 
 ### Example
-Extend `me.shib.java.lib.jbots.JBotModel` abstract model class and create a new Model for your bot
+Extend `me.shib.java.lib.jbots.JBot` abstract model class and create a new Model for your bot
 ```java
-public final class YourModelClassName extends JBotModel {
-
-    public YourModelClassName(JBotConfig config) {
+public final class SampleJBot extends JBot {
+    public SampleJBot(JBotConfig config) {
         super(config);
     }
 
     @Override
-    public Message onMessageFromAdmin(Message message) {
-        try {
-            return getBot().sendMessage(new ChatId(message.getChat().getId()), "Got a message from admin!");
-        } catch (IOException e) {
-            return null;
-        }
+    public MessageHandler onMessage(Message message) {
+        return new MessageHandler(message) {
+            @Override
+            public boolean onCommandFromAdmin(String command, String argument) {
+                try {
+                    bot().sendMessage(new ChatId(message.getChat().getId()), "Got a command \"" + command + "\" with the following argument from admin:\n" + argument);
+                    return true;
+                } catch (IOException e) {
+                    return true;
+                }
+            }
+
+            @Override
+            public boolean onCommandFromUser(String command, String argument) {
+                try {
+                    bot().sendMessage(new ChatId(message.getChat().getId()), "Got a command \"" + command + "\" with the following argument from user:\n" + argument);
+                    return true;
+                } catch (IOException e) {
+                    return true;
+                }
+            }
+
+            @Override
+            public boolean onMessageFromAdmin() {
+                try {
+                    bot().sendMessage(new ChatId(message.getChat().getId()), "Got a message from admin!");
+                    return true;
+                } catch (IOException e) {
+                    return true;
+                }
+            }
+
+            @Override
+            public boolean onMessageFromUser() {
+                try {
+                    bot().sendMessage(new ChatId(message.getChat().getId()), "Got a message from user!");
+                    return true;
+                } catch (IOException e) {
+                    return true;
+                }
+            }
+        };
     }
 
     @Override
-    public Message onCommand(Message message) {
-        try {
-            return getBot().sendMessage(new ChatId(message.getChat().getId()), "Got the command - " + message.getText());
-        } catch (IOException e) {
-            return null;
-        }
+    public void onInlineQuery(InlineQuery query) {
+        System.out.println(query);
     }
 
     @Override
-    public Message onReceivingMessage(Message message) {
-        try {
-            return getBot().sendMessage(new ChatId(message.getChat().getId()), "Got a message from user!");
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean onInlineQuery(InlineQuery query) {
-        try {
-            return getBot().answerInlineQuery(query.getId(), new InlineQueryResult[]{new InlineQueryResultArticle("1", "Test Title", "Test Text")});
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
+    public void onChosenInlineResult(ChosenInlineResult chosenInlineResult) {
         System.out.println(chosenInlineResult);
-        return true;
     }
 
     @Override
-    public boolean onCallbackQuery(CallbackQuery callbackQuery) {
+    public void onCallbackQuery(CallbackQuery callbackQuery) {
         System.out.println(callbackQuery);
-        return true;
     }
 }
 ```

@@ -4,7 +4,6 @@ import me.shib.java.lib.jbotstats.AnalyticsBot;
 import me.shib.java.lib.jtelebot.models.types.*;
 import me.shib.java.lib.jtelebot.models.updates.*;
 import me.shib.java.lib.jtelebot.service.TelegramBot;
-import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,18 +20,17 @@ public abstract class JBot extends Thread {
     private static final Logger logger = Logger.getLogger(JBot.class.getName());
     private static final Map<String, JBot> botSweeperMap = new HashMap<>();
     private static final Date startTime = new Date();
-    private static final Reflections reflections = new Reflections("");
 
     private static int threadCounter = 0;
 
-    protected TelegramBot bot;
-    protected JBotConfig config;
-    protected String botRatingUrl;
-    protected String botReviewMarkdownMessage;
+    private TelegramBot bot;
+    private JBotConfig config;
     private UpdateReceiver updateReceiver;
     private boolean enabled;
     private boolean sweeperMode;
     private int threadNumber;
+    protected String botRatingUrl;
+    protected String botReviewMarkdownMessage;
 
     public JBot(JBotConfig config) {
         this.config = config;
@@ -44,6 +42,14 @@ public abstract class JBot extends Thread {
         this.enabled = true;
         this.sweeperMode = false;
         this.threadNumber = 0;
+    }
+
+    protected TelegramBot bot() {
+        return this.bot;
+    }
+
+    protected JBotConfig config() {
+        return this.config;
     }
 
     private static synchronized int getThreadNumber() {
@@ -92,7 +98,7 @@ public abstract class JBot extends Thread {
             sweeper = new DefaultJBot(config);
             sweeper.sweeperMode = true;
             botSweeperMap.put(config.botApiToken(), sweeper);
-            logger.log(Level.INFO, "Starting services for: " + sweeper.bot.getIdentity().getFirst_name() + " (" + sweeper.bot.getIdentity().getUsername() + ")");
+            logger.log(Level.INFO, "Starting services for: " + sweeper.bot().getIdentity().getFirst_name() + " (" + sweeper.bot().getIdentity().getUsername() + ")");
             sweeper.start();
         }
         return sweeper;
@@ -101,7 +107,7 @@ public abstract class JBot extends Thread {
     protected static synchronized JBot startNewJBot(JBotConfig config) {
         JBot jBot = new DefaultJBot(config);
         jBot.threadNumber = getThreadNumber();
-        logger.log(Level.INFO, "Starting thread " + jBot.threadNumber + " with " + jBot.bot.getIdentity().getUsername() + " using the model: " + jBot.getModelClassName());
+        logger.log(Level.INFO, "Starting thread " + jBot.threadNumber + " with " + jBot.bot().getIdentity().getUsername() + " using the model: " + jBot.getModelClassName());
         jBot.start();
         return jBot;
     }
@@ -135,7 +141,7 @@ public abstract class JBot extends Thread {
 
     public String getAnalyticsRedirectedURL(long user_id, String url) {
         try {
-            AnalyticsBot analyticsBot = (AnalyticsBot) bot;
+            AnalyticsBot analyticsBot = (AnalyticsBot) bot();
             String analyticsURL = analyticsBot.getAnalyticsRedirectedURL(user_id, url);
             if (analyticsURL != null) {
                 return analyticsURL;
@@ -188,7 +194,7 @@ public abstract class JBot extends Thread {
                     messageBuilder.append("\nWe regret that the service has been down for *")
                             .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
                             .append("* for maintenance.\nWe'll try to make sure this doesn't happen again.");
-                    bot.sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
+                    bot().sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
                             ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
                 } catch (IOException e) {
                     logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
@@ -199,22 +205,22 @@ public abstract class JBot extends Thread {
 
     public boolean forwardToAdmins(Message message) {
         try {
-            long[] admins = config.admins();
+            long[] admins = config().admins();
             if ((admins != null) && (admins.length > 0)) {
                 for (long admin : admins) {
                     try {
-                        bot.forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
+                        bot().forwardMessage(new ChatId(admin), new ChatId(message.getFrom().getId()),
                                 message.getMessage_id());
                     } catch (IOException e) {
                         logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
                     }
                 }
-                bot.sendMessage(new ChatId(message.getChat().getId()),
+                bot().sendMessage(new ChatId(message.getChat().getId()),
                         "Your message has been forwarded to the *admin*. It might take quite sometime to get back to you. Please be patient.",
                         ParseMode.Markdown, false, message.getMessage_id());
                 return true;
             }
-            bot.sendMessage(new ChatId(message.getChat().getId()),
+            bot().sendMessage(new ChatId(message.getChat().getId()),
                     "The support team is unavailable. Please try later.", null, false, message.getMessage_id());
         } catch (IOException e) {
             logger.throwing(this.getClass().getName(), "forwardToAdmins", e);
@@ -223,8 +229,8 @@ public abstract class JBot extends Thread {
     }
 
     private void sweeperAction() {
-        long intervals = config.reportInterval() * 1000;
-        long[] adminIdList = config.admins();
+        long intervals = config().reportInterval() * 1000;
+        long[] adminIdList = config().admins();
         if ((intervals > 0) && (adminIdList != null) && (adminIdList.length > 0)) {
             while (enabled) {
                 try {
@@ -268,7 +274,7 @@ public abstract class JBot extends Thread {
                 Update update = updateReceiver.getUpdate();
                 if (update.getMessage() != null) {
                     Message message = update.getMessage();
-                    boolean adminMode = (config.isAdmin(message.getChat().getId()) || config.isAdmin(message.getFrom().getId())) && (!config.isUserMode(message.getFrom().getId()));
+                    boolean adminMode = (config().isAdmin(message.getChat().getId()) || config().isAdmin(message.getFrom().getId())) && (!config().isUserMode(message.getFrom().getId()));
                     MessageHandler messageHandler = onMessage(message);
                     if (messageHandler != null) {
                         String command = getCommand(message.getText());
@@ -319,9 +325,9 @@ public abstract class JBot extends Thread {
     public abstract void onCallbackQuery(CallbackQuery callbackQuery);
 
     public void sendStatusMessage(long chatId) {
-        if (config.defaultWorker()) {
+        if (config().defaultWorker()) {
             try {
-                bot.sendMessage(new ChatId(chatId),
+                bot().sendMessage(new ChatId(chatId),
                         "Reporting status:\nHost: " + getHostInfo() + "\nUp Time: " + getUpTime());
             } catch (IOException e) {
                 logger.throwing(this.getClass().getName(), "sendStatusMessage", e);

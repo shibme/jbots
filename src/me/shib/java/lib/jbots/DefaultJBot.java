@@ -61,7 +61,7 @@ final class DefaultJBot extends JBot {
     private void invalidMessageResponse(ChatId chatId, boolean appHandled) {
         if ((!appHandled) && (config.defaultWorker())) {
             try {
-                bot.sendMessage(chatId, "Invalid Message.");
+                bot().sendMessage(chatId, "Invalid Message.");
             } catch (IOException e) {
                 logger.throwing(this.getClass().getName(), "invalidMessageResponse", e);
             }
@@ -96,16 +96,16 @@ final class DefaultJBot extends JBot {
                         case "/scr":
                             if (message.getText().equalsIgnoreCase("/scr")) {
                                 try {
-                                    bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
+                                    bot().sendChatAction(new ChatId(message.getChat().getId()), ChatAction.upload_document);
                                     File screenShotFile = getCurrentScreenShotFile();
                                     if (screenShotFile != null) {
-                                        bot.sendDocument(new ChatId(message.getChat().getId()),
+                                        bot().sendDocument(new ChatId(message.getChat().getId()),
                                                 new InputFile(screenShotFile));
                                         if (!screenShotFile.delete()) {
                                             logger.log(Level.FINE, "Screenshot file, \"" + screenShotFile.getAbsolutePath() + "\" was not deleted.");
                                         }
                                     } else {
-                                        bot.sendMessage(new ChatId(message.getChat().getId()),
+                                        bot().sendMessage(new ChatId(message.getChat().getId()),
                                                 "I couldn't take a screenshot right now. I'm sorry.");
                                     }
                                     return true;
@@ -117,7 +117,7 @@ final class DefaultJBot extends JBot {
                         case "/status":
                             if (message.getText().equalsIgnoreCase("/status")) {
                                 try {
-                                    bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+                                    bot().sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
                                     sendStatusMessage(message.getChat().getId());
                                     return true;
                                 } catch (IOException e) {
@@ -129,7 +129,7 @@ final class DefaultJBot extends JBot {
                             if (message.getText().equalsIgnoreCase("/usermode") && config.isAdmin(message.getChat().getId())) {
                                 config.setUserMode(message.getFrom().getId());
                                 try {
-                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
+                                    bot().sendMessage(new ChatId(message.getChat().getId()), "Switched to *User Mode*", ParseMode.Markdown);
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
@@ -185,7 +185,7 @@ final class DefaultJBot extends JBot {
                             if (message.getText().equalsIgnoreCase("/adminmode") && config.isAdmin(message.getChat().getId())) {
                                 config.setAdminMode(message.getFrom().getId());
                                 try {
-                                    bot.sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
+                                    bot().sendMessage(new ChatId(message.getChat().getId()), "Switched to *Admin Mode*", ParseMode.Markdown);
                                     return true;
                                 } catch (IOException e) {
                                     logger.throwing(this.getClass().getName(), "onCommandFromUser", e);
@@ -208,30 +208,30 @@ final class DefaultJBot extends JBot {
                         long replyToUser = message.getReply_to_message().getForward_from().getId();
                         if (replyToUser > 0) {
                             if (message.getText() != null) {
-                                bot.sendMessage(new ChatId(replyToUser), message.getText());
+                                bot().sendMessage(new ChatId(replyToUser), message.getText());
                                 return true;
                             } else if (message.getDocument() != null) {
-                                bot.sendDocument(new ChatId(replyToUser),
+                                bot().sendDocument(new ChatId(replyToUser),
                                         new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getVideo() != null) {
-                                bot.sendVideo(new ChatId(replyToUser),
+                                bot().sendVideo(new ChatId(replyToUser),
                                         new InputFile(message.getVideo().getFile_id()));
                                 return true;
                             } else if (message.getPhoto() != null) {
-                                bot.sendPhoto(new ChatId(replyToUser),
+                                bot().sendPhoto(new ChatId(replyToUser),
                                         new InputFile(message.getPhoto()[message.getPhoto().length - 1].getFile_id()));
                                 return true;
                             } else if (message.getAudio() != null) {
-                                bot.sendDocument(new ChatId(replyToUser),
+                                bot().sendDocument(new ChatId(replyToUser),
                                         new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getVoice() != null) {
-                                bot.sendDocument(new ChatId(replyToUser),
+                                bot().sendDocument(new ChatId(replyToUser),
                                         new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             } else if (message.getSticker() != null) {
-                                bot.sendDocument(new ChatId(replyToUser),
+                                bot().sendDocument(new ChatId(replyToUser),
                                         new InputFile(message.getDocument().getFile_id()));
                                 return true;
                             }
@@ -280,10 +280,10 @@ final class DefaultJBot extends JBot {
     }
 
     private Message onStartAndHelp(Message message) throws IOException {
-        bot.sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
-        return bot.sendMessage(new ChatId(message.getChat().getId()),
-                "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot.getIdentity().getFirst_name() + "* (@"
-                        + bot.getIdentity().getUsername() + "). I'll try to serve you the best way I can.\n\n*Welcome!*",
+        bot().sendChatAction(new ChatId(message.getChat().getId()), ChatAction.typing);
+        return bot().sendMessage(new ChatId(message.getChat().getId()),
+                "Hi " + message.getFrom().getFirst_name() + ". My name is *" + bot().getIdentity().getFirst_name() + "* (@"
+                        + bot().getIdentity().getUsername() + "). I'll try to serve you the best way I can.\n\n*Welcome!*",
                 ParseMode.Markdown);
     }
 
@@ -309,10 +309,10 @@ final class DefaultJBot extends JBot {
                     reviewText = reviewText.replaceFirst(getStars(1), "");
                 }
                 if (!reviewText.isEmpty()) {
-                    bot.sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage,
+                    bot().sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage,
                             ParseMode.Markdown, true, 0, new ReplyKeyboardHide(false));
                 } else {
-                    bot.sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.",
+                    bot().sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.",
                             ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
                 }
                 return true;
@@ -327,7 +327,7 @@ final class DefaultJBot extends JBot {
         KeyboardButton[][] keyboard = new KeyboardButton[][]{{new KeyboardButton(getStars(1)), new KeyboardButton(getStars(2))},
                 {new KeyboardButton(getStars(3)), new KeyboardButton(getStars(4))},
                 {new KeyboardButton(getStars(5))}};
-        bot.sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
+        bot().sendMessage(chatId, "Please *give us " + getStars(5) + " rating* and an *amazing review*",
                 ParseMode.Markdown, false, 0, new ReplyKeyboardMarkup(keyboard));
     }
 
