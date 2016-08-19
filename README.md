@@ -12,7 +12,7 @@ Add to your `pom.xml`
 <dependency>
 	<groupId>me.shib.java.lib</groupId>
 	<artifactId>jbots</artifactId>
-	<version>0.7</version>
+	<version>0.8.0</version>
 </dependency>
 ```
 Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher` when you use maven assembly plugin to create a runnable binary JAR.
@@ -20,7 +20,7 @@ Also, you'll have to add the main class as `me.shib.java.lib.jbots.JBotLauncher`
 ### Example
 Extend `me.shib.java.lib.jbots.JBotModel` abstract model class and create a new Model for your bot
 ```java
-public class YourModelClassName extends JBotModel {
+public final class YourModelClassName extends JBotModel {
 
     public YourModelClassName(JBotConfig config) {
         super(config);
@@ -76,56 +76,58 @@ public class YourModelClassName extends JBotModel {
 }
 ```
 
-##### Sample Config file
-Create a file named `jbots-config.json` and add the following
-```json
-[
-  {
-    "botApiToken": "YourBotApiToken1",
-    "botModelClassName": "com.example.YourModelClassName1",
-    "commandList": ["/start","/help","/status","/scr"],
-    "threadCount": 4,
-    "adminIdList": [1111111111111, 2222222222222],
-    "defaultWorkerDisabled": true,
-    "reportIntervalInSeconds": 604800,
-    "botStatsConfig": {
-      "botStatsClassName": "com.example.TestAnalytics",
-      "token": "AnalyticsTokenGoesHere",
-      "botStatsConstants": {
-        "encryptionPassPhrase": "SampleEncryptionPassPhrase"
-      }
-    },
-    "constants": {
-      "channelName": "@ExampleChannel2"
+##### Sample Config class
+Create a class extending `me.shib.java.lib.jbots.JBotConfig` and override the methods that might be necessary
+```java
+public final class SampleConfig extends JBotConfig {
+
+    private static final String botApiToken = "xxxxxxxxxxxxxxxxxxx";
+    private static final Class<? extends JBot> botModelClass = XYZ.class;
+    private static final int threadCount = 4;
+    private static final int reportInterval = 43200;
+    private static final int minimumAllowedRating = 5;
+    private static final boolean handleMissedChats = true;
+    private static final boolean defaultWorker = true;
+    private static final long[] admins = {1111111111, 2222222222};
+
+    @Override
+    public int threadCount() {
+        return threadCount;
     }
-  },
-  {
-    "botApiToken": "YourBotApiToken2",
-    "botModelClassName": "com.example.YourModelClassName2",
-    "commandList": ["/start","/help","/status","/scr"],
-    "threadCount": 2,
-    "adminIdList": [1111111111111, 2222222222222],
-    "defaultWorkerDisabled": false,
-    "reportIntervalInSeconds": 86400,
-    "botStatsConfig": {
-      "botStatsClassName": "com.example.TestAnalytics",
-      "token": "AnalyticsTokenGoesHere",
-      "botStatsConstants": {
-        "encryptionPassPhrase": "SampleEncryptionPassPhrase"
-      }
-    },
-    "constants": {
-      "channelName": "@ExampleChannel1"
+
+    @Override
+    public int reportInterval() {
+        return reportInterval;
     }
-  }
-]
+
+    @Override
+    public int minimumAllowedRating() {
+        return minimumAllowedRating;
+    }
+
+    @Override
+    public boolean handleMissedChats() {
+        return handleMissedChats;
+    }
+
+    @Override
+    public boolean defaultWorker() {
+        return defaultWorker;
+    }
+
+    @Override
+    protected long[] admins() {
+        return admins;
+    }
+
+    @Override
+    public String botApiToken() {
+        return botApiToken;
+    }
+
+    @Override
+    public Class<? extends JBot> botModelClass() {
+        return botModelClass;
+    }
+}
 ```
-* `botApiToken` - The API token that you receive when you create a bot with [@BotFather](https://telegram.me/BotFather).
-* `botModelClassName` - The fully qualified class name of the bot's Model extended from JBotModel.
-* `commandList` - The list of supported commands you may have.
-* `threadCount` - The number of threads the bot should have.
-* `adminIdList` - Use [@GO_Robot](https://telegram.me/GO_Robot) to find your telegram ID and add it to admin list.
-* `defaultWorkerDisabled` - If set true, the default responses that happen in case of failures won't be sent.
-* `reportIntervalInSeconds` - The intervals at which the Bot reports the Admins the status (More often to know if it is up and running).
-* `botStatsConfig` - The config object that defines the bot's analytics model.
-* `constants` - Any other constants that might be used along with the bots. updated and retrieved from a hash map.

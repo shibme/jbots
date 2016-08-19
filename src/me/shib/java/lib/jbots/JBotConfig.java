@@ -90,7 +90,7 @@ public abstract class JBotConfig {
         for (Class configClass : configClasses) {
             try {
                 Class<?> clazz = Class.forName(configClass.getName());
-                Constructor<?> ctor = clazz.getConstructor(JBotConfig.class);
+                Constructor<?> ctor = clazz.getConstructor();
                 JBotConfig config = (JBotConfig) ctor.newInstance();
                 if (configMap.get(config.botApiToken()) == null) {
                     configMap.put(config.botApiToken(), config);
