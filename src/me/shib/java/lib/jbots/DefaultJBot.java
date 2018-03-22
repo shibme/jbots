@@ -310,10 +310,10 @@ final class DefaultJBot extends JBot {
                 }
                 if (!reviewText.isEmpty()) {
                     bot().sendMessage(new ChatId(message.getChat().getId()), botReviewMarkdownMessage,
-                            ParseMode.Markdown, true, 0, new ReplyKeyboardHide(false));
+                            ParseMode.Markdown, true, 0, new ReplyKeyboardRemove(false));
                 } else {
                     bot().sendMessage(new ChatId(message.getChat().getId()), "Thanks for your rating.",
-                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
+                            ParseMode.Markdown, false, 0, new ReplyKeyboardRemove(false));
                 }
                 return true;
             }

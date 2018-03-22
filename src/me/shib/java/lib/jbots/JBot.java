@@ -195,7 +195,7 @@ public abstract class JBot extends Thread {
                             .append(getRoundedDowntime(updateReceiver.getStartTime() - message.getDate()))
                             .append("* for maintenance.\nWe'll try to make sure this doesn't happen again.");
                     bot().sendMessage(new ChatId(message.getChat().getId()), messageBuilder.toString(),
-                            ParseMode.Markdown, false, 0, new ReplyKeyboardHide(false));
+                            ParseMode.Markdown, false, 0, new ReplyKeyboardRemove(false));
                 } catch (IOException e) {
                     logger.throwing(this.getClass().getName(), "messageUsersOnDowntimeFailure", e);
                 }
