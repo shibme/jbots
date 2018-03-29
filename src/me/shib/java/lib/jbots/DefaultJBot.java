@@ -71,7 +71,27 @@ final class DefaultJBot extends JBot {
     @Override
     public MessageHandler onMessage(Message message) {
         if (processIfReview(message)) {
-            return null;
+            return new MessageHandler(message) {
+                @Override
+                public boolean onCommandFromAdmin(String command, String argument) {
+                    return false;
+                }
+
+                @Override
+                public boolean onCommandFromUser(String command, String argument) {
+                    return false;
+                }
+
+                @Override
+                public boolean onMessageFromAdmin() {
+                    return false;
+                }
+
+                @Override
+                public boolean onMessageFromUser() {
+                    return false;
+                }
+            };
         }
 
         abstract class DefaultMessageHandler extends MessageHandler {
